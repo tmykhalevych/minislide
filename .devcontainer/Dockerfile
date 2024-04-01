@@ -5,7 +5,7 @@ ENV TZ=Etc/UTC
 USER root
 
 RUN apt-get update
-RUN apt-get install -y build-essential curl zsh git wget cmake clang-format doxygen gdb libgtest-dev
+RUN apt-get install -y build-essential curl zsh git wget cmake clang-format doxygen gdb libgtest-dev gcc-arm-none-eabi
 
 RUN cd /usr/src/googletest && \
     cmake . && \

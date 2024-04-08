@@ -1,0 +1,16 @@
+add_library(hal STATIC)
+target_include_directories(hal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+if(NOT HOST)
+    pico_sdk_init()
+    target_link_libraries(hal PRIVATE pico_stdlib)
+    target_sources(hal PRIVATE pico/gpio.cpp)
+else()
+    target_sources(hal PRIVATE host/gpio.cpp)
+endif()
+
+function(add_extra_outputs target)
+    if(NOT HOST)
+        pico_add_extra_outputs(${target})
+    endif()
+endfunction()

@@ -114,7 +114,4 @@ void vAssertCalled(const char* file_name, unsigned line);
 #define INCLUDE_xTaskResumeFromISR              1
 #define INCLUDE_xQueueGetMutexHolder            1
 
-// Helpers
-#define NEVER_RETURN                            while (true) {}
-
 // clang-format on

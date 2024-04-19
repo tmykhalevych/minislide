@@ -1,12 +1,12 @@
-FROM gcc:latest
+FROM ubuntu:jammy
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 USER root
 
-# System utils
+# Default C++ dev env utils
 RUN apt-get update
-RUN apt-get install -y zsh git wget cmake clang-format doxygen gdb libgtest-dev
+RUN apt-get install -y build-essential zsh git wget cmake clang-format doxygen gdb libgtest-dev
 
 # Google Test
 RUN cd /usr/src/googletest && \
@@ -25,8 +25,8 @@ ENV PATH="${PATH}:/root/.venv/bin"
 RUN pip install pre-commit
 
 # Project dependencies
-RUN apt-get install -y build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib \
-                       gdb-multiarch pkg-config libusb-1.0-0-dev
+RUN apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib gdb-multiarch \
+                       pkg-config libusb-1.0-0-dev usbutils libtool
 
 # OpenOCD
 RUN mkdir /usr/src/openocd && \

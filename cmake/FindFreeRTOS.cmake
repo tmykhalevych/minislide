@@ -19,5 +19,5 @@ if (NOT FREERTOS_PATH)
 endif()
 
 function(freertos_init)
-  add_subdirectory(${FREERTOS_PATH}/FreeRTOS/Source FreeRTOS)
+  add_subdirectory(${FREERTOS_PATH}/FreeRTOS/Source freertos)
 endfunction()

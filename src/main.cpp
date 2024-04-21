@@ -1,28 +1,29 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include <hal/gpio.hpp>
+#include <hal/hal.hpp>
+#include <hal/status_led.hpp>
 
 #include <cassert>
 
-#define LED_GPIO 25
-
 int main()
 {
-    auto test_task = [](void*) {
-        hal::GpioOut led(LED_GPIO);
+    hal::init();
 
-        hal::GpioState state = hal::GpioState::ON;
+    auto test_task = [](void*) {
+        using State = hal::StatusLed::State;
+        auto state = State::ON;
         while (true) {
-            led.write(state);
-            vTaskDelay(pdMS_TO_TICKS(500));
-            state = (state == hal::GpioState::ON) ? hal::GpioState::OFF : hal::GpioState::ON;
+            hal::StatusLed::set_state(state);
+            vTaskDelay(pdMS_TO_TICKS(2'000));
+            state = (state == State::ON) ? State::OFF : State::ON;
         }
     };
 
     xTaskCreate(test_task, "test", configMINIMAL_STACK_SIZE, nullptr, tskIDLE_PRIORITY, nullptr);
 
     vTaskStartScheduler();
+
     return 0;
 }
 

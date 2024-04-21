@@ -1,13 +1,19 @@
 add_library(hal STATIC)
-target_include_directories(hal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set(HAL_IMPL "")
 
 if(NOT HOST)
+    set(HAL_IMPL pico)
+    set(PICO_BOARD pico_w)
     pico_sdk_init()
-    target_link_libraries(hal PRIVATE pico_stdlib)
-    target_sources(hal PRIVATE pico/gpio.cpp)
+    target_link_libraries(hal PRIVATE pico_stdlib pico_cyw43_arch_none)
 else()
-    target_sources(hal PRIVATE host/gpio.cpp)
+    message(FATAL_ERROR "HOST buils is not supported yet")
+    set(HAL_IMPL host)
 endif()
+
+target_include_directories(hal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+file(GLOB HAL_SORCES ${HAL_IMPL}/*.cpp)
+target_sources(hal PRIVATE ${HAL_SORCES})
 
 function(add_extra_outputs target)
     if(NOT HOST)

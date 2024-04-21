@@ -14,7 +14,8 @@
         "cschlosser.doxdocgen",
         "ms-vscode.makefile-tools",
         "ms-python.vscode-pylance",
-        "ms-python.python"
+        "ms-python.python",
+        "marus25.cortex-debug"
       ],
       "settings": {
         "terminal.integrated.profiles.linux": {
@@ -30,8 +31,13 @@
     }
   },
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached",
+    "source=/dev/bus/usb,target=/dev/bus/usb,type=bind",
+    "source=/dev/ttyACM0,target=/dev/ttyACM0,type=bind"
   ],
   "postAttachCommand": "pre-commit install",
-  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "runArgs": [
+    "--privileged"
+  ]
 }

@@ -6,7 +6,7 @@ USER root
 
 # Default C++ dev env utils
 RUN apt-get update
-RUN apt-get install -y build-essential zsh git wget cmake clang-format doxygen gdb libgtest-dev
+RUN apt-get install -y build-essential zsh git wget cmake clang-format doxygen libgtest-dev
 
 # Google Test
 RUN cd /usr/src/googletest && \
@@ -26,7 +26,7 @@ RUN pip install pre-commit
 
 # Project dependencies
 RUN apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib gdb-multiarch \
-                       pkg-config libusb-1.0-0-dev usbutils libtool
+                       pkg-config libusb-1.0-0-dev usbutils libtool picocom
 
 # OpenOCD
 RUN mkdir /usr/src/openocd && \

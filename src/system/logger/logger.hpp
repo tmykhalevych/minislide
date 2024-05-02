@@ -33,8 +33,7 @@ enum class Severity : uint8_t
 class Logger
 {
 public:
-    Logger(
-        Severity sev = Severity::INFO, get_timestamp_cb_t get_timestamp_cb = [] { return std::time(nullptr); })
+    Logger(Severity sev, get_timestamp_cb_t get_timestamp_cb)
         : m_sev(sev), m_get_timestamp_cb(std::move(get_timestamp_cb))
     {}
 
@@ -83,15 +82,17 @@ void Logger::log(SourceLoc loc, Severity sev, std::string_view format, TArgs&&..
     std::printf("%s%s%s", m_entry_header.data(), m_entry_body.data(), ENTRIES_DELIMITER);
 }
 
-using SingleLogger = common::Singleton<Logger>;
-
-template <typename... TArgs>
-inline void log(SourceLoc loc, Severity sev, std::string_view format, TArgs&&... args)
+inline void create_and_start(
+    Severity sev = Severity::INFO, get_timestamp_cb_t get_timestamp_cb = [] { return std::time(nullptr); })
 {
-    SingleLogger::Ptr logger = SingleLogger::instance();
-    ASSERT(logger);
+    common::Singleton<Logger>::emplace(sev, std::move(get_timestamp_cb));
+}
 
-    logger->log(loc, sev, format, std::forward<TArgs>(args)...);
+inline common::Singleton<Logger>::Ptr access()
+{
+    typename common::Singleton<Logger>::Ptr logger = common::Singleton<Logger>::instance();
+    ASSERT(logger);
+    return logger;
 }
 
 }  // namespace logger

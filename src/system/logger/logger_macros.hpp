@@ -2,7 +2,7 @@
 
 // clang-format off
 
-#define LOG(sev, format, ...) logger::log(logger::SourceLoc::current(), (sev), (format), ## __VA_ARGS__)
+#define LOG(sev, format, ...) logger::access()->log(logger::SourceLoc::current(), (sev), (format), ## __VA_ARGS__)
 
 #define LOG_FATAL(format, ...) { LOG(logger::Severity::FATAL, (format), ## __VA_ARGS__); ASSERT(false); }
 #define LOG_ERROR(format, ...) { LOG(logger::Severity::ERROR, (format), ## __VA_ARGS__); }

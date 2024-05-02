@@ -8,7 +8,8 @@
 int main()
 {
     hal::init();
-    logger::SingleLogger::emplace(logger::Severity::DEBUG);
+
+    logger::create_and_start(logger::Severity::DEBUG);
 
     auto test_task = [](void*) {
         using State = hal::StatusLed::State;
@@ -41,7 +42,7 @@ extern "C" void vApplicationStackOverflowHook(TaskHandle_t task_hdl, char* task_
 
 extern "C" void vAssertCalled(const char* file_name, unsigned line)
 {
-    LOG_ERROR("assert at %s:%u", file_name, line);
+    std::printf("assert at %s:%u", file_name, line);
     while (true) {
     }
 }

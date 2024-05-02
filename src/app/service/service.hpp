@@ -45,6 +45,7 @@ protected:
 private:
     ServiceImplInterface auto& impl() { return static_cast<ServiceImpl&>(*this); }
 
+    // TODO: consider making these atomic
     bool m_running = false;
     bool m_satrted = false;
 
@@ -54,6 +55,8 @@ private:
 template <typename ServiceImpl>
 bool Service<ServiceImpl>::start()
 {
+    ASSERT(!m_satrted);
+
     if (!impl().setup()) {
         LOG_ERROR("failed to setup %s", m_name.data());
         return false;

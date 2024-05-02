@@ -2,7 +2,7 @@
 
 #include <FreeRTOS.h>
 
-#include <hal/status_led.hpp>
+#include <led.hpp>
 #include <logger.hpp>
 #include <service.hpp>
 
@@ -13,32 +13,6 @@
 
 // clang-format on
 
-class TestService : public service::Service<TestService>
-{
-public:
-    TestService() : Service("test") {}
-
-    bool setup() { return true; }
-    bool try_suspend() { return true; }
-    bool try_resume() { return true; }
-
-    void main()
-    {
-        run_periodic(
-            [this] {
-                m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
-                LOG_INFO("LED is %s", (m_led_state == State::ON) ? "ON" : "OFF");
-                hal::StatusLed::set_state(m_led_state);
-            },
-            2'000);
-    }
-
-private:
-    using State = hal::StatusLed::State;
-
-    State m_led_state = State::OFF;
-};
-
 namespace app
 {
 
@@ -46,7 +20,7 @@ namespace app
 {
     logger::create_and_start(logger::Severity::DEBUG);
 
-    REQUIRED(service::create_and_start<TestService>());
+    REQUIRED(service::create_and_start<LedService>());
 
     return true;
 }

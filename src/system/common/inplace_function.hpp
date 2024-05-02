@@ -1,6 +1,8 @@
 #pragma once
 
 #include <FreeRTOS.h>
+
+#include <assert.hpp>
 #include <prohibit_copy_move.hpp>
 
 #include <array>
@@ -43,7 +45,7 @@ struct VTable : public ProhibitCopyMove
 
     constexpr VTable()
         : invoke([](storage_ptr_t, TArgs&&...) {
-            configASSERT(false);
+            ASSERT(false);
             return TRet();
         })
         , copy([](storage_ptr_t, storage_ptr_t) {})

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.hpp>
 #include <logger.hpp>
 #include <prohibit_copy_move.hpp>
 #include <singleton.hpp>
@@ -112,7 +113,7 @@ template <ServiceInterface S>
 common::Singleton<S>::Ptr access()
 {
     typename common::Singleton<S>::Ptr service = common::Singleton<S>::instance();
-    configASSERT(service);
+    ASSERT(service);
     return service;
 }
 

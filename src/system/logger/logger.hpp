@@ -1,7 +1,6 @@
 #pragma once
 
-#include <FreeRTOS.h>
-
+#include <assert.hpp>
 #include <inplace_function.hpp>
 #include <mutex.hpp>
 #include <prohibit_copy_move.hpp>
@@ -68,7 +67,7 @@ void Logger::log(SourceLoc loc, Severity sev, std::string_view format, TArgs&&..
             case Severity::INFO: return "I";
             case Severity::DEBUG: return "D";
         }
-        configASSERT(false);
+        ASSERT(false);
         return {};
     };
 
@@ -90,7 +89,7 @@ template <typename... TArgs>
 inline void log(SourceLoc loc, Severity sev, std::string_view format, TArgs&&... args)
 {
     SingleLogger::Ptr logger = SingleLogger::instance();
-    configASSERT(logger);
+    ASSERT(logger);
 
     logger->log(loc, sev, format, std::forward<TArgs>(args)...);
 }

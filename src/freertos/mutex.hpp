@@ -1,9 +1,10 @@
 #pragma once
 
-#include <prohibit_copy_move.hpp>
-
 #include <FreeRTOS.h>
 #include <semphr.h>
+
+#include <assert.hpp>
+#include <prohibit_copy_move.hpp>
 
 #include <mutex>
 
@@ -14,7 +15,7 @@ namespace freertos
 class Mutex : common::ProhibitCopy
 {
 public:
-    Mutex() : m_hdl(xSemaphoreCreateMutex()) { configASSERT(m_hdl); }
+    Mutex() : m_hdl(xSemaphoreCreateMutex()) { ASSERT(m_hdl); }
 
     void lock() { xSemaphoreTake(m_hdl, portMAX_DELAY); }
     void unlock() { xSemaphoreGive(m_hdl); }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.hpp>
+#include <event_loop.hpp>
 #include <logger.hpp>
 #include <prohibit_copy_move.hpp>
 #include <singleton.hpp>
@@ -10,8 +11,6 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
-#include <type_traits>
-#include <utility>
 
 namespace service
 {
@@ -30,7 +29,7 @@ concept ServiceImplInterface = requires(I s)
 // clang-format on
 
 template <typename ServiceImpl>
-class Service : public common::ProhibitCopyMove
+class Service : public EventLoop
 {
 public:
     void start();
@@ -42,8 +41,6 @@ public:
 
 protected:
     explicit Service(std::string_view name) : m_name(name) {}
-
-    // add methods for tasks scheduling
 
 private:
     ServiceImplInterface auto& impl() { return static_cast<ServiceImpl&>(*this); }
@@ -62,10 +59,11 @@ void Service<ServiceImpl>::start()
         return;
     }
 
-    // create event loop
-    // start service with main()
+    run([this] {
+        m_running = true;
+        impl().main();
+    });
 
-    m_running = true;
     m_satrted = true;
 }
 
@@ -79,8 +77,7 @@ void Service<ServiceImpl>::suspend()
         return;
     }
 
-    // suspend event loop
-
+    EventLoop::suspend();
     m_running = false;
 }
 
@@ -94,8 +91,7 @@ void Service<ServiceImpl>::resume()
         return;
     }
 
-    // resume event loop
-
+    EventLoop::resume();
     m_running = true;
 }
 

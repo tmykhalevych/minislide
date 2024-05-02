@@ -4,28 +4,42 @@
 #include <hal/hal.hpp>
 #include <hal/status_led.hpp>
 #include <logger.hpp>
+#include <service.hpp>
+
+class TestService : public service::Service<TestService>
+{
+public:
+    TestService() : Service("test") {}
+
+    bool setup() { return true; }
+    bool try_suspend() { return true; }
+    bool try_resume() { return true; }
+
+    void main()
+    {
+        run_periodic(
+            [this] {
+                m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
+                LOG_INFO("LED is %s", (m_led_state == State::ON) ? "ON" : "OFF");
+                hal::StatusLed::set_state(m_led_state);
+            },
+            2'000);
+    }
+
+private:
+    using State = hal::StatusLed::State;
+
+    State m_led_state = State::OFF;
+};
 
 int main()
 {
     hal::init();
 
     logger::create_and_start(logger::Severity::DEBUG);
-
-    auto test_task = [](void*) {
-        using State = hal::StatusLed::State;
-        auto state = State::ON;
-        while (true) {
-            LOG_INFO("LED is %s", (state == State::ON) ? "ON" : "OFF");
-            hal::StatusLed::set_state(state);
-            vTaskDelay(pdMS_TO_TICKS(2'000));
-            state = (state == State::ON) ? State::OFF : State::ON;
-        }
-    };
-
-    xTaskCreate(test_task, "test", configMINIMAL_STACK_SIZE, nullptr, tskIDLE_PRIORITY, nullptr);
+    service::create_and_start<TestService>();
 
     vTaskStartScheduler();
-
     return 0;
 }
 
@@ -42,7 +56,7 @@ extern "C" void vApplicationStackOverflowHook(TaskHandle_t task_hdl, char* task_
 
 extern "C" void vAssertCalled(const char* file_name, unsigned line)
 {
-    std::printf("assert at %s:%u", file_name, line);
+    std::printf("assert at %s:%u\n", file_name, line);
     while (true) {
     }
 }

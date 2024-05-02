@@ -11,4 +11,4 @@ endif()
 freertos_init()
 
 add_library(freertos INTERFACE)
-target_link_libraries(freertos INTERFACE freertos_kernel)
+target_link_libraries(freertos INTERFACE freertos_kernel common)

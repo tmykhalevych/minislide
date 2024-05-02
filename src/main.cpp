@@ -3,17 +3,18 @@
 
 #include <hal/hal.hpp>
 #include <hal/status_led.hpp>
-
-#include <cassert>
+#include <logger.hpp>
 
 int main()
 {
     hal::init();
+    logger::SingleLogger::emplace(logger::Severity::DEBUG);
 
     auto test_task = [](void*) {
         using State = hal::StatusLed::State;
         auto state = State::ON;
         while (true) {
+            LOG_INFO("LED is %s", (state == State::ON) ? "ON" : "OFF");
             hal::StatusLed::set_state(state);
             vTaskDelay(pdMS_TO_TICKS(2'000));
             state = (state == State::ON) ? State::OFF : State::ON;
@@ -29,17 +30,18 @@ int main()
 
 extern "C" void vApplicationMallocFailedHook()
 {
-    configASSERT(false);
+    LOG_FATAL("allocation failure");
 }
 
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t task_hdl, char* task_name)
 {
-    configASSERT(false);
+    (void)task_hdl;
+    LOG_FATAL("stach overflow [tsk:%s]", task_name);
 }
 
 extern "C" void vAssertCalled(const char* file_name, unsigned line)
 {
-    assert(false);
+    LOG_ERROR("assert at %s:%u", file_name, line);
     while (true) {
     }
 }

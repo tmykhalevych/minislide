@@ -32,7 +32,7 @@ template <typename ServiceImpl>
 class Service : public EventLoop
 {
 public:
-    void start();
+    bool start();
 
     void suspend();
     void resume();
@@ -52,11 +52,11 @@ private:
 };
 
 template <typename ServiceImpl>
-void Service<ServiceImpl>::start()
+bool Service<ServiceImpl>::start()
 {
     if (!impl().setup()) {
         LOG_ERROR("failed to setup %s", m_name.data());
-        return;
+        return false;
     }
 
     run([this] {
@@ -65,6 +65,7 @@ void Service<ServiceImpl>::start()
     });
 
     m_satrted = true;
+    return true;
 }
 
 template <typename ServiceImpl>
@@ -99,10 +100,10 @@ template <typename S>
 concept ServiceInterface = std::derived_from<S, Service<S>>;
 
 template <ServiceInterface S>
-void create_and_start()
+bool create_and_start()
 {
     common::Singleton<S>::emplace();
-    common::Singleton<S>::instance()->start();
+    return common::Singleton<S>::instance()->start();
 }
 
 template <ServiceInterface S>

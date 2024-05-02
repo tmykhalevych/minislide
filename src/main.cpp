@@ -1,45 +1,14 @@
 #include <FreeRTOS.h>
-#include <task.h>
 
+#include <app.hpp>
+#include <assert.hpp>
 #include <hal/hal.hpp>
-#include <hal/status_led.hpp>
-#include <logger.hpp>
-#include <service.hpp>
-
-class TestService : public service::Service<TestService>
-{
-public:
-    TestService() : Service("test") {}
-
-    bool setup() { return true; }
-    bool try_suspend() { return true; }
-    bool try_resume() { return true; }
-
-    void main()
-    {
-        run_periodic(
-            [this] {
-                m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
-                LOG_INFO("LED is %s", (m_led_state == State::ON) ? "ON" : "OFF");
-                hal::StatusLed::set_state(m_led_state);
-            },
-            2'000);
-    }
-
-private:
-    using State = hal::StatusLed::State;
-
-    State m_led_state = State::OFF;
-};
 
 int main()
 {
-    hal::init();
-
-    logger::create_and_start(logger::Severity::DEBUG);
-    service::create_and_start<TestService>();
-
-    vTaskStartScheduler();
+    ASSERT(hal::init());
+    ASSERT(app::init());
+    app::start();
     return 0;
 }
 

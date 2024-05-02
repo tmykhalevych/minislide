@@ -3,6 +3,6 @@
 namespace hal
 {
 
-bool init();
+[[nodiscard]] bool init();
 
 }  // namespace hal

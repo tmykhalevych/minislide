@@ -40,7 +40,7 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name) : m_name(name) {}
+    explicit Service(std::string_view name) : EventLoop(name) {}
 
 private:
     ServiceImplInterface auto& impl() { return static_cast<ServiceImpl&>(*this); }
@@ -48,8 +48,6 @@ private:
     // TODO: consider making these atomic
     bool m_running = false;
     bool m_satrted = false;
-
-    std::string m_name;
 };
 
 template <typename ServiceImpl>
@@ -58,7 +56,7 @@ bool Service<ServiceImpl>::start()
     ASSERT(!m_satrted);
 
     if (!impl().setup()) {
-        LOG_ERROR("failed to setup %s", m_name.data());
+        LOG_ERROR("failed to setup %s", name().data());
         return false;
     }
 
@@ -77,7 +75,7 @@ void Service<ServiceImpl>::suspend()
     if (!m_running) return;
 
     if (!impl().try_suspend()) {
-        LOG_ERROR("failed to suspend %s", m_name.data());
+        LOG_ERROR("failed to suspend %s", name().data());
         return;
     }
 
@@ -91,7 +89,7 @@ void Service<ServiceImpl>::resume()
     if (m_running) return;
 
     if (!impl().try_resume()) {
-        LOG_ERROR("failed to resume %s", m_name.data());
+        LOG_ERROR("failed to resume %s", name().data());
         return;
     }
 

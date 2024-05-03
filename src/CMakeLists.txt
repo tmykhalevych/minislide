@@ -12,6 +12,10 @@ add_extra_outputs(${application})
 
 add_custom_command(TARGET ${application}
                    POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy
-                           ${CMAKE_CURRENT_BINARY_DIR}/${application}.*
-                           ${artifacts})
+                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${application}.* ${artifacts}
+                   COMMENT "Copying artifacts into '${artifacts}'")
+
+add_custom_command(TARGET ${application}
+                   POST_BUILD
+                   COMMAND ${CMAKE_SIZE_UTIL} --format=SysV ${artifacts}/${application}.elf
+                   COMMENT "Dumping '${application}.elf' segments sizes")

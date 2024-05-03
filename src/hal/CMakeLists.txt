@@ -6,7 +6,12 @@ if(NOT HOST)
     set(PICO_BOARD pico_w)
     set(PICO_DEFAULT_FLOAT_IMPL pico_float_default)
     set(PICO_DEFAULT_DOUBLE_IMPL pico_double_default)
+
     pico_sdk_init()
+
+    pico_find_compiler(PICO_SIZE ${PICO_GCC_TRIPLE}-size)
+    set(CMAKE_SIZE_UTIL ${PICO_SIZE} CACHE FILEPATH "")
+
     target_link_libraries(hal PUBLIC pico_float PRIVATE pico_stdlib pico_cyw43_arch_none)
 else()
     message(FATAL_ERROR "HOST buils is not supported yet")

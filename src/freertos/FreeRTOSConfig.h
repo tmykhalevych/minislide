@@ -70,7 +70,7 @@ void vAssertCalled(const char* file_name, unsigned line);
 
 // Run time and task stats gathering related definitions
 #define configGENERATE_RUN_TIME_STATS           0
-#define configUSE_TRACE_FACILITY                0
+#define configUSE_TRACE_FACILITY                1
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
 
 // Software timer related definitions
@@ -113,5 +113,7 @@ void vAssertCalled(const char* file_name, unsigned line);
 #define INCLUDE_xTaskGetHandle                  1
 #define INCLUDE_xTaskResumeFromISR              1
 #define INCLUDE_xQueueGetMutexHolder            1
+
+#define pdTICKS_TO_MS(ticks)                    ((ticks) * configTICK_RATE_HZ / 1000)
 
 // clang-format on

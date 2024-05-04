@@ -1,5 +1,8 @@
 #pragma once
 
+#include <FreeRTOS.h>
+#include <task.h>
+
 #include <assert.hpp>
 #include <inplace_function.hpp>
 #include <mutex.hpp>
@@ -29,6 +32,19 @@ enum class Severity : uint8_t
     INFO,
     DEBUG
 };
+
+inline std::string_view get_current_task_name()
+{
+    const auto current_task = xTaskGetCurrentTaskHandle();
+    if (!current_task) {
+        return "GLOBAL";
+    }
+
+    TaskStatus_t status;
+    vTaskGetInfo(current_task, &status, pdTRUE, eInvalid);
+
+    return status.pcTaskName;
+}
 
 class Logger
 {
@@ -74,8 +90,9 @@ void Logger::log(SourceLoc loc, Severity sev, std::string_view format, TArgs&&..
     // TODO: add milliseconds
     const size_t offset = std::strftime(m_entry_header.data(), 30, "%Y-%m-%d-%H:%M:%S", std::localtime(&ts));
 
-    std::snprintf(m_entry_header.data() + offset, m_entry_header.max_size() - offset, " [%s] [%s:%u] ",
-                  to_string(sev).data(), file_path.substr(file_path.find_last_of("/") + 1).data(), loc.line());
+    std::snprintf(m_entry_header.data() + offset, m_entry_header.max_size() - offset, " [%s] [%s] [%s:%u] ",
+                  to_string(sev).data(), get_current_task_name().data(),
+                  file_path.substr(file_path.find_last_of("/") + 1).data(), loc.line());
 
     std::snprintf(m_entry_body.data(), m_entry_body.max_size(), format.data(), std::forward<TArgs>(args)...);
 

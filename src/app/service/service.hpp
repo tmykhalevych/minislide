@@ -1,5 +1,7 @@
 #pragma once
 
+#include <FreeRTOS.h>
+
 #include <assert.hpp>
 #include <event_loop.hpp>
 #include <logger.hpp>
@@ -28,7 +30,12 @@ concept ServiceImplInterface = requires(I s)
 
 // clang-format on
 
-template <typename ServiceImpl>
+[[nodiscard]] inline EventLoop::Timepoint get_boot_time_ms()
+{
+    return pdTICKS_TO_MS(xTaskGetTickCount());
+}
+
+template <typename ServiceImpl, size_t StackSize = configMINIMAL_STACK_SIZE, size_t Prio = tskIDLE_PRIORITY>
 class Service : public EventLoop
 {
 public:
@@ -40,7 +47,9 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name) : EventLoop(name) {}
+    explicit Service(std::string_view name, EventLoop::get_time_cb_t get_time_cb = get_boot_time_ms)
+        : EventLoop(name, StackSize, Prio, get_time_cb)
+    {}
 
 private:
     ServiceImplInterface auto& impl() { return static_cast<ServiceImpl&>(*this); }
@@ -50,8 +59,8 @@ private:
     bool m_satrted = false;
 };
 
-template <typename ServiceImpl>
-bool Service<ServiceImpl>::start()
+template <typename ServiceImpl, size_t StackSize, size_t Prio>
+bool Service<ServiceImpl, StackSize, Prio>::start()
 {
     ASSERT(!m_satrted);
 
@@ -69,8 +78,8 @@ bool Service<ServiceImpl>::start()
     return true;
 }
 
-template <typename ServiceImpl>
-void Service<ServiceImpl>::suspend()
+template <typename ServiceImpl, size_t StackSize, size_t Prio>
+void Service<ServiceImpl, StackSize, Prio>::suspend()
 {
     if (!m_running) return;
 
@@ -83,8 +92,8 @@ void Service<ServiceImpl>::suspend()
     m_running = false;
 }
 
-template <typename ServiceImpl>
-void Service<ServiceImpl>::resume()
+template <typename ServiceImpl, size_t StackSize, size_t Prio>
+void Service<ServiceImpl, StackSize, Prio>::resume()
 {
     if (m_running) return;
 
@@ -97,8 +106,21 @@ void Service<ServiceImpl>::resume()
     m_running = true;
 }
 
+/// @brief Utility to check if a class derives from Service with any parameters
+template <typename Derived, template <typename, size_t, size_t> class Base>
+struct is_derived_from_service_impl
+{
+    template <typename T>
+    static constexpr auto check(T*) -> std::true_type;
+    static constexpr auto check(...) -> std::false_type;
+    using type = decltype(check(std::declval<Base<Derived, 0, 0>*>()));
+};
+
+template <typename Derived, template <typename, size_t, size_t> class Base>
+using is_derived_from_service = typename is_derived_from_service_impl<Derived, Base>::type;
+
 template <typename S>
-concept ServiceInterface = std::derived_from<S, Service<S>>;
+concept ServiceInterface = is_derived_from_service<S, Service>::value;
 
 template <ServiceInterface S>
 bool create_and_start()

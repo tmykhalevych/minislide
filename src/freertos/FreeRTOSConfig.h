@@ -85,7 +85,7 @@ void vAssertCalled(const char* file_name, unsigned line);
 // #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
 
 // SMP port only
-#define configNUM_CORES                         2
+#define configNUMBER_OF_CORES                   1
 #define configTICK_CORE                         0
 #define configRUN_MULTIPLE_PRIORITIES           0
 

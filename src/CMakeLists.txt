@@ -1,5 +1,5 @@
-add_subdirectory(freertos)
 add_subdirectory(platform)
+add_subdirectory(freertos)
 add_subdirectory(app)
 
 set(application ${CMAKE_PROJECT_NAME})

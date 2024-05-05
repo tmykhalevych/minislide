@@ -1,7 +1,8 @@
 add_library(platform STATIC)
 set(PLATFOM_IMPL "")
 
-if(HOST)
+if (CMAKE_BUILD_TYPE STREQUAL "Host")
+    include(host/toolchain.cmake)
     set(PLATFOM_IMPL host)
 else()
     set(PLATFOM_IMPL pico)
@@ -22,19 +23,21 @@ file(GLOB PLATFORM_SRCS ${PLATFOM_IMPL}/*.cpp)
 target_sources(platform PRIVATE ${PLATFORM_SRCS})
 
 function(add_platform_post_build_steps target artifacts_dir)
-    add_custom_command(TARGET ${application}
-                       POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${application}.* ${artifacts_dir}
-                       COMMENT "Copying artifacts into '${artifacts_dir}'")
+    add_custom_command(
+        TARGET ${application}
+        POST_BUILD
+        COMMAND mkdir -p ${artifacts_dir} && cp ${CMAKE_CURRENT_BINARY_DIR}/${application}.* ${artifacts_dir}
+        COMMENT "Copying artifacts into '${artifacts_dir}'")
 
-    if(HOST)
+    if (CMAKE_BUILD_TYPE STREQUAL "Host")
         # TODO: add HOST post build steps
     else()
         pico_add_extra_outputs(${target})
 
-        add_custom_command(TARGET ${application}
-                           POST_BUILD
-                           COMMAND ${CMAKE_SIZE_UTIL} --format=SysV ${artifacts_dir}/${application}.elf
-                           COMMENT "Dumping '${application}.elf' segments sizes")
+        add_custom_command(
+            TARGET ${application}
+            POST_BUILD
+            COMMAND ${CMAKE_SIZE_UTIL} --format=SysV ${artifacts_dir}/${application}.elf
+            COMMENT "Dumping '${application}.elf' segments sizes")
     endif()
 endfunction()

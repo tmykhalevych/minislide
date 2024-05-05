@@ -267,6 +267,12 @@ TickType_t EventLoop<S, I, D>::process_deferred_tasks(Milliseconds start_timepoi
         }
 
         m_deferred_tasks.pop_into(current_deferred_task);
+
+        // ignore canceled tasks
+        if (!m_deferred_handles.count(current_deferred_task.handle)) {
+            continue;
+        }
+
         m_deferred_mutex.unlock();
         current_deferred_task.task();
         m_deferred_mutex.lock();

@@ -94,6 +94,8 @@ private:
 
     TaskHandle_t m_worker_handle;
     EventGroupHandle_t m_worker_events;
+
+    // TODO: consider making these atomic
     bool m_worker_stopped = false;
     bool m_worker_alive = true;
 };
@@ -134,6 +136,11 @@ void EventLoop<S, I, D>::run_immediate(Task&& task)
 {
     {
         std::lock_guard lock(m_immediate_mutex);
+
+        if (m_immediate_tasks.full()) {
+            LOG_FATAL("immediate queue is full");
+        }
+
         m_immediate_tasks.push(std::move(task));
     }
 
@@ -148,7 +155,12 @@ EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_after(Task&& task, Millis
 
     {
         std::lock_guard lock(m_deferred_mutex);
-        m_deferred_tasks.push(DeferredTask{.handle = handle, .task = std::move(task), .deadline = now + delay});
+
+        if (m_deferred_tasks.full()) {
+            LOG_FATAL("deffered queue is full");
+        }
+
+        m_deferred_tasks.push({.handle = handle, .task = std::move(task), .deadline = now + delay});
         m_deferred_handles.insert(handle);
     }
 
@@ -164,8 +176,12 @@ EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_periodic(Task&& task, Mil
 
     {
         std::lock_guard lock(m_deferred_mutex);
-        m_deferred_tasks.push(
-            DeferredTask{.handle = handle, .task = std::move(task), .deadline = now + delay, .period = period});
+
+        if (m_deferred_tasks.full()) {
+            LOG_FATAL("deffered queue is full");
+        }
+
+        m_deferred_tasks.push({.handle = handle, .task = std::move(task), .deadline = now + delay, .period = period});
         m_deferred_handles.insert(handle);
     }
 

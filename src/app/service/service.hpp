@@ -59,13 +59,13 @@ private:
 
     // TODO: consider making these atomic
     bool m_running = false;
-    bool m_satrted = false;
+    bool m_started = false;
 };
 
 template <typename Impl, size_t S, size_t I, size_t D>
 bool Service<Impl, S, I, D>::start()
 {
-    ASSERT(!m_satrted);
+    ASSERT(!m_started);
 
     if (!impl().setup()) {
         LOG_ERROR("failed to setup");
@@ -77,7 +77,7 @@ bool Service<Impl, S, I, D>::start()
         impl().main();
     });
 
-    m_satrted = true;
+    m_started = true;
     return true;
 }
 

@@ -10,7 +10,7 @@ namespace
 
 using el_bound_fn_t = void (service::EventLoop::*)();
 template <el_bound_fn_t F>
-void Bound(void* context)
+void Bind(void* context)
 {
     std::invoke(F, static_cast<service::EventLoop*>(context));
 }
@@ -24,11 +24,21 @@ EventLoop::EventLoop(std::string_view name, size_t stack_size, size_t prio, get_
     : m_name(name), m_get_time_cb(std::move(get_time_cb)), m_worker_events(xEventGroupCreate())
 {
     const BaseType_t status =
-        xTaskCreate(Bound<&EventLoop::worker_thread>, m_name.data(), static_cast<configSTACK_DEPTH_TYPE>(stack_size),
+        xTaskCreate(Bind<&EventLoop::worker_thread>, m_name.data(), static_cast<configSTACK_DEPTH_TYPE>(stack_size),
                     this, static_cast<UBaseType_t>(prio), &m_worker_handle);
 
     ASSERT(m_worker_events);
     ASSERT(status == pdPASS);
+}
+
+EventLoop::~EventLoop()
+{
+    m_worker_alive = false;
+    xEventGroupSetBits(m_worker_events, Event::WAKE);
+    xEventGroupWaitBits(m_worker_events, Event::EXIT, pdTRUE, pdFALSE, portMAX_DELAY);
+
+    vTaskDelete(m_worker_handle);
+    vEventGroupDelete(m_worker_events);
 }
 
 void EventLoop::TaskHandle::cancel()

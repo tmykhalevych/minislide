@@ -11,24 +11,36 @@
 namespace freertos
 {
 
-/// @brief Very basic std-compatible wrapper for FreeRTOS mutexes
-class Mutex : common::ProhibitCopy
+namespace details
+{
+
+class MutexBase : public common::ProhibitCopy
 {
 public:
-    Mutex() : m_hdl(xSemaphoreCreateMutex()) { ASSERT(m_hdl); }
+    MutexBase(SemaphoreHandle_t hdl) : m_hdl(hdl) { ASSERT(m_hdl); }
+    ~MutexBase() { vSemaphoreDelete(m_hdl); }
 
-    void lock() { ASSERT(xSemaphoreTake(m_hdl, portMAX_DELAY)); }
-    void unlock() { ASSERT(xSemaphoreGive(m_hdl)); }
-
-private:
+protected:
     SemaphoreHandle_t m_hdl;
 };
 
-/// @brief Very basic std-compatible wrapper for FreeRTOS recursive mutexes
-class RecursiveMutex : common::ProhibitCopy
+}  // namespace details
+
+/// @brief Very basic std-compatible wrapper for FreeRTOS mutexes
+class Mutex : public details::MutexBase
 {
 public:
-    RecursiveMutex() : m_hdl(xSemaphoreCreateRecursiveMutex()) { ASSERT(m_hdl); }
+    Mutex() : MutexBase(xSemaphoreCreateMutex()) {}
+
+    void lock() { ASSERT(xSemaphoreTake(m_hdl, portMAX_DELAY)); }
+    void unlock() { ASSERT(xSemaphoreGive(m_hdl)); }
+};
+
+/// @brief Very basic std-compatible wrapper for FreeRTOS recursive mutexes
+class RecursiveMutex : public details::MutexBase
+{
+public:
+    RecursiveMutex() : MutexBase(xSemaphoreCreateRecursiveMutex()) {}
 
     void lock() { ASSERT(xSemaphoreTakeRecursive(m_hdl, portMAX_DELAY)); }
     void unlock() { ASSERT(xSemaphoreGiveRecursive(m_hdl)); }

@@ -49,6 +49,8 @@ public:
     TaskHandle run_after(Task&& task, Timepoint delay_ms);
     TaskHandle run_periodic(Task&& task, Timepoint period_ms, Timepoint delay_ms = 0);
 
+    ~EventLoop();
+
 protected:
     explicit EventLoop(std::string_view name, size_t stack_size, size_t prio, get_time_cb_t get_time_cb);
 
@@ -66,7 +68,7 @@ private:
         std::optional<Timepoint> period = std::nullopt;
 
         [[nodiscard]] bool operator<(const DeferredTask& other) const { return deadline < other.deadline; }
-        [[nodiscard]] static DeferredTaskHandle get_next_handle() { return ++next_handle; }
+        [[nodiscard]] static DeferredTaskHandle get_next_handle() { return next_handle++; }
 
     private:
         inline static DeferredTaskHandle next_handle = 0;

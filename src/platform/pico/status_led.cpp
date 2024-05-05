@@ -1,7 +1,7 @@
-#include <hal/status_led.hpp>
 #include <pico/cyw43_arch.h>
+#include <status_led.hpp>
 
-using namespace hal;
+using namespace platform;
 
 void StatusLed::set_state(State state)
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-namespace hal
+namespace platform
 {
 
 [[nodiscard]] bool init();
 
-}  // namespace hal
+}  // namespace platform

@@ -1,21 +1,11 @@
 add_subdirectory(freertos)
-add_subdirectory(hal)
+add_subdirectory(platform)
 add_subdirectory(app)
 
 set(application ${CMAKE_PROJECT_NAME})
-set(artifacts ${CMAKE_BINARY_DIR}/out)
+set(artifacts_dir ${CMAKE_BINARY_DIR}/out)
 
 add_executable(${application} main.cpp)
-target_link_libraries(${application} PRIVATE freertos hal app)
+target_link_libraries(${application} PRIVATE freertos platform app)
 
-add_extra_outputs(${application})
-
-add_custom_command(TARGET ${application}
-                   POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${application}.* ${artifacts}
-                   COMMENT "Copying artifacts into '${artifacts}'")
-
-add_custom_command(TARGET ${application}
-                   POST_BUILD
-                   COMMAND ${CMAKE_SIZE_UTIL} --format=SysV ${artifacts}/${application}.elf
-                   COMMENT "Dumping '${application}.elf' segments sizes")
+add_platform_post_build_steps(${application} ${artifacts_dir})

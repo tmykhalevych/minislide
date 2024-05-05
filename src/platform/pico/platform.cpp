@@ -1,9 +1,9 @@
-#include <hal/hal.hpp>
+#include <platform.hpp>
 
 #include <pico/cyw43_arch.h>
 #include <pico/stdlib.h>
 
-namespace hal
+namespace platform
 {
 
 bool init()
@@ -14,4 +14,4 @@ bool init()
     return true;
 }
 
-}  // namespace hal
+}  // namespace platform

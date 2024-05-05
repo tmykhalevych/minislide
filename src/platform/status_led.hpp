@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 
-namespace hal
+namespace platform
 {
 
 class StatusLed
@@ -17,4 +17,4 @@ public:
     static void set_state(State state);
 };
 
-}  // namespace hal
+}  // namespace platform

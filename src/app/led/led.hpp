@@ -1,7 +1,7 @@
 #pragma once
 
-#include <hal/status_led.hpp>
 #include <service.hpp>
+#include <status_led.hpp>
 
 namespace app
 {
@@ -21,13 +21,13 @@ public:
             [this] {
                 m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
                 LOG_INFO("LED is %s", (m_led_state == State::ON) ? "ON" : "OFF");
-                hal::StatusLed::set_state(m_led_state);
+                platform::StatusLed::set_state(m_led_state);
             },
             2'000);
     }
 
 private:
-    using State = hal::StatusLed::State;
+    using State = platform::StatusLed::State;
 
     State m_led_state = State::OFF;
 };

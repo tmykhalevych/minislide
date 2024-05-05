@@ -2,11 +2,11 @@
 
 #include <app.hpp>
 #include <assert.hpp>
-#include <hal/hal.hpp>
+#include <platform.hpp>
 
 int main()
 {
-    ASSERT(hal::init());
+    ASSERT(platform::init());
     ASSERT(app::init());
     app::start();
     return 0;

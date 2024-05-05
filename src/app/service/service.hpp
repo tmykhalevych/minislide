@@ -30,13 +30,16 @@ concept ServiceImplInterface = requires(I s)
 
 // clang-format on
 
-[[nodiscard]] inline EventLoop::Timepoint get_boot_time_ms()
+[[nodiscard]] inline Timepoint get_boot_time_ms()
 {
     return pdTICKS_TO_MS(xTaskGetTickCount());
 }
 
-template <typename ServiceImpl, size_t StackSize = configMINIMAL_STACK_SIZE, size_t Prio = tskIDLE_PRIORITY>
-class Service : public EventLoop
+static constexpr size_t DEFAULT_TASK_QUEUE_CAPACITY = 10;
+
+template <typename ServiceImpl, size_t StackSize = configMINIMAL_STACK_SIZE,
+          size_t ImmediateQueueCap = DEFAULT_TASK_QUEUE_CAPACITY, size_t DeferredQueueCap = DEFAULT_TASK_QUEUE_CAPACITY>
+class Service : public EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>
 {
 public:
     bool start();
@@ -47,8 +50,9 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name, EventLoop::get_time_cb_t get_time_cb = get_boot_time_ms)
-        : EventLoop(name, StackSize, Prio, get_time_cb)
+    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time_ms,
+                     size_t prio = tskIDLE_PRIORITY)
+        : EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>(name, prio, get_time_cb)
     {}
 
 private:
@@ -59,17 +63,17 @@ private:
     bool m_satrted = false;
 };
 
-template <typename ServiceImpl, size_t StackSize, size_t Prio>
-bool Service<ServiceImpl, StackSize, Prio>::start()
+template <typename Impl, size_t S, size_t I, size_t D>
+bool Service<Impl, S, I, D>::start()
 {
     ASSERT(!m_satrted);
 
     if (!impl().setup()) {
-        LOG_ERROR("failed to setup %s", name().data());
+        LOG_ERROR("failed to setup");
         return false;
     }
 
-    run([this] {
+    this->run_immediate([this] {
         m_running = true;
         impl().main();
     });
@@ -78,45 +82,45 @@ bool Service<ServiceImpl, StackSize, Prio>::start()
     return true;
 }
 
-template <typename ServiceImpl, size_t StackSize, size_t Prio>
-void Service<ServiceImpl, StackSize, Prio>::suspend()
+template <typename Impl, size_t S, size_t I, size_t D>
+void Service<Impl, S, I, D>::suspend()
 {
     if (!m_running) return;
 
     if (!impl().try_suspend()) {
-        LOG_ERROR("failed to suspend %s", name().data());
+        LOG_ERROR("failed to suspend");
         return;
     }
 
-    EventLoop::suspend();
+    EventLoop<S, I, D>::suspend();
     m_running = false;
 }
 
-template <typename ServiceImpl, size_t StackSize, size_t Prio>
-void Service<ServiceImpl, StackSize, Prio>::resume()
+template <typename Impl, size_t S, size_t I, size_t D>
+void Service<Impl, S, I, D>::resume()
 {
     if (m_running) return;
 
     if (!impl().try_resume()) {
-        LOG_ERROR("failed to resume %s", name().data());
+        LOG_ERROR("failed to resume");
         return;
     }
 
-    EventLoop::resume();
+    EventLoop<S, I, D>::resume();
     m_running = true;
 }
 
 /// @brief Utility to check if a class derives from Service with any parameters
-template <typename Derived, template <typename, size_t, size_t> class Base>
+template <typename Derived, template <typename, size_t, size_t, size_t> class Base>
 struct is_derived_from_service_impl
 {
     template <typename T>
     static constexpr auto check(T*) -> std::true_type;
     static constexpr auto check(...) -> std::false_type;
-    using type = decltype(check(std::declval<Base<Derived, 0, 0>*>()));
+    using type = decltype(check(std::declval<Base<Derived, 0, 0, 0>*>()));
 };
 
-template <typename Derived, template <typename, size_t, size_t> class Base>
+template <typename Derived, template <typename, size_t, size_t, size_t> class Base>
 using is_derived_from_service = typename is_derived_from_service_impl<Derived, Base>::type;
 
 template <typename S>

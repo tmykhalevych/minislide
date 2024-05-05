@@ -238,22 +238,22 @@ void EventLoop<S, I, D>::worker_thread()
 template <size_t S, size_t I, size_t D>
 void EventLoop<S, I, D>::process_immediate_tasks()
 {
-    std::lock_guard lock(m_immediate_mutex);
+    std::unique_lock lock(m_immediate_mutex);
 
     Task current_task;
 
     while (!m_immediate_tasks.empty()) {
         m_immediate_tasks.pop_into(current_task);
-        m_immediate_mutex.unlock();
+        lock.unlock();
         current_task();
-        m_immediate_mutex.lock();
+        lock.lock();
     }
 }
 
 template <size_t S, size_t I, size_t D>
 TickType_t EventLoop<S, I, D>::process_deferred_tasks(Milliseconds start_timepoint)
 {
-    std::lock_guard lock(m_deferred_mutex);
+    std::unique_lock lock(m_deferred_mutex);
 
     DeferredTask current_deferred_task;
     TickType_t next_delay_ticks = portMAX_DELAY;
@@ -273,9 +273,9 @@ TickType_t EventLoop<S, I, D>::process_deferred_tasks(Milliseconds start_timepoi
             continue;
         }
 
-        m_deferred_mutex.unlock();
+        lock.unlock();
         current_deferred_task.task();
-        m_deferred_mutex.lock();
+        lock.lock();
 
         // handle periodic tasks
         if (current_deferred_task.period) {

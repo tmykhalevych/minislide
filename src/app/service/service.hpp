@@ -30,7 +30,7 @@ concept ServiceImplInterface = requires(I s)
 
 // clang-format on
 
-[[nodiscard]] inline Timepoint get_boot_time_ms()
+[[nodiscard]] inline Milliseconds get_boot_time()
 {
     return pdTICKS_TO_MS(xTaskGetTickCount());
 }
@@ -50,8 +50,7 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time_ms,
-                     size_t prio = tskIDLE_PRIORITY)
+    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time, size_t prio = tskIDLE_PRIORITY)
         : EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>(name, prio, get_time_cb)
     {}
 

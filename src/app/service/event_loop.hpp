@@ -21,8 +21,8 @@ namespace service
 {
 
 using Task = common::InplaceFunction<void()>;
-using Timepoint = uint;
-using get_time_cb_t = common::InplaceFunction<Timepoint()>;
+using Milliseconds = TickType_t;
+using get_time_cb_t = common::InplaceFunction<Milliseconds()>;
 
 template <size_t StackSize, size_t ImmediateQueueCapacity, size_t DeferredQueueCapacity>
 class EventLoop : public common::ProhibitCopyMove
@@ -46,8 +46,8 @@ public:
     };
 
     void run_immediate(Task&& task);
-    TaskHandle run_after(Task&& task, Timepoint delay_ms);
-    TaskHandle run_periodic(Task&& task, Timepoint period_ms, Timepoint delay_ms = 0);
+    TaskHandle run_after(Task&& task, Milliseconds delay);
+    TaskHandle run_periodic(Task&& task, Milliseconds period, Milliseconds delay = 0);
 
     ~EventLoop();
 
@@ -62,8 +62,8 @@ private:
     {
         TaskHandleImpl handle;
         Task task;
-        Timepoint deadline;
-        std::optional<Timepoint> period = std::nullopt;
+        Milliseconds deadline;
+        std::optional<Milliseconds> period = std::nullopt;
 
         [[nodiscard]] bool operator<(const DeferredTask& other) const { return deadline < other.deadline; }
         [[nodiscard]] static TaskHandleImpl get_next_handle() { return next_handle++; }
@@ -81,7 +81,7 @@ private:
 
     void worker_thread();
     void process_immediate_tasks();
-    TickType_t process_deferred_tasks(Timepoint start_timepoint);
+    TickType_t process_deferred_tasks(Milliseconds start_timepoint);
 
     get_time_cb_t m_get_time_cb;
 
@@ -141,14 +141,14 @@ void EventLoop<S, I, D>::run_immediate(Task&& task)
 }
 
 template <size_t S, size_t I, size_t D>
-EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_after(Task&& task, Timepoint delay_ms)
+EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_after(Task&& task, Milliseconds delay)
 {
-    const Timepoint now = m_get_time_cb();
+    const Milliseconds now = m_get_time_cb();
     const TaskHandleImpl handle = DeferredTask::get_next_handle();
 
     {
         std::lock_guard lock(m_deferred_mutex);
-        m_deferred_tasks.push(DeferredTask{.handle = handle, .task = std::move(task), .deadline = now + delay_ms});
+        m_deferred_tasks.push(DeferredTask{.handle = handle, .task = std::move(task), .deadline = now + delay});
         m_deferred_handles.insert(handle);
     }
 
@@ -157,15 +157,15 @@ EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_after(Task&& task, Timepo
 }
 
 template <size_t S, size_t I, size_t D>
-EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_periodic(Task&& task, Timepoint period_ms, Timepoint delay_ms)
+EventLoop<S, I, D>::TaskHandle EventLoop<S, I, D>::run_periodic(Task&& task, Milliseconds period, Milliseconds delay)
 {
-    const Timepoint now = m_get_time_cb();
+    const Milliseconds now = m_get_time_cb();
     const TaskHandleImpl handle = DeferredTask::get_next_handle();
 
     {
         std::lock_guard lock(m_deferred_mutex);
         m_deferred_tasks.push(
-            DeferredTask{.handle = handle, .task = std::move(task), .deadline = now + delay_ms, .period = period_ms});
+            DeferredTask{.handle = handle, .task = std::move(task), .deadline = now + delay, .period = period});
         m_deferred_handles.insert(handle);
     }
 
@@ -202,7 +202,7 @@ template <size_t S, size_t I, size_t D>
 void EventLoop<S, I, D>::worker_thread()
 {
     while (m_worker_alive) {
-        const Timepoint now = m_get_time_cb();
+        const Milliseconds now = m_get_time_cb();
         TickType_t next_delay_ticks = portMAX_DELAY;
 
         if (m_worker_stopped) {
@@ -235,7 +235,7 @@ void EventLoop<S, I, D>::process_immediate_tasks()
 }
 
 template <size_t S, size_t I, size_t D>
-TickType_t EventLoop<S, I, D>::process_deferred_tasks(Timepoint start_timepoint)
+TickType_t EventLoop<S, I, D>::process_deferred_tasks(Milliseconds start_timepoint)
 {
     std::lock_guard lock(m_deferred_mutex);
 
@@ -243,7 +243,7 @@ TickType_t EventLoop<S, I, D>::process_deferred_tasks(Timepoint start_timepoint)
     TickType_t next_delay_ticks = portMAX_DELAY;
 
     while (!m_deferred_tasks.empty()) {
-        const Timepoint next_deadline = m_deferred_tasks.top().deadline;
+        const Milliseconds next_deadline = m_deferred_tasks.top().deadline;
 
         if (next_deadline > start_timepoint) {
             next_delay_ticks = pdMS_TO_TICKS(next_deadline - start_timepoint);

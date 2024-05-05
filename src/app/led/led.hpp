@@ -17,11 +17,13 @@ public:
 
     void main()
     {
-        run([this] {
-            m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
-            LOG_INFO("LED is %s", (m_led_state == State::ON) ? "ON" : "OFF");
-            hal::StatusLed::set_state(m_led_state);
-        });
+        run_periodic(
+            [this] {
+                m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
+                LOG_INFO("LED is %s", (m_led_state == State::ON) ? "ON" : "OFF");
+                hal::StatusLed::set_state(m_led_state);
+            },
+            2'000);
     }
 
 private:

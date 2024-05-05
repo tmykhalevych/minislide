@@ -44,9 +44,6 @@ public:
 
     void lock() { ASSERT(xSemaphoreTakeRecursive(m_hdl, portMAX_DELAY)); }
     void unlock() { ASSERT(xSemaphoreGiveRecursive(m_hdl)); }
-
-private:
-    SemaphoreHandle_t m_hdl;
 };
 
 }  // namespace freertos

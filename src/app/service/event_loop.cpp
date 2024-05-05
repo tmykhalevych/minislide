@@ -116,37 +116,64 @@ void EventLoop::worker_thread()
 {
     while (m_worker_alive) {
         const Timepoint now = m_get_time_cb();
-        Timepoint next_delay = 0;
+        TickType_t next_delay_ticks = portMAX_DELAY;
 
         if (m_worker_stopped) {
             xEventGroupSetBits(m_worker_events, Event::STOP);
         }
         else {
             process_immediate_tasks();
-            next_delay = process_deferred_tasks(now);
+            next_delay_ticks = process_deferred_tasks(now);
         }
 
-        xEventGroupWaitBits(m_worker_events, Event::WAKE, pdTRUE, pdFALSE, pdMS_TO_TICKS(next_delay));
+        xEventGroupWaitBits(m_worker_events, Event::WAKE, pdTRUE, pdFALSE, next_delay_ticks);
     }
+
     xEventGroupSetBits(m_worker_events, Event::EXIT);
 }
 
 void EventLoop::process_immediate_tasks()
 {
     std::lock_guard lock(m_immediate_mutex);
+
+    Task current_task;
+
     while (!m_immediate_tasks.empty()) {
-        Task task;
-        m_immediate_tasks.pop_into(task);
+        m_immediate_tasks.pop_into(current_task);
         m_immediate_mutex.unlock();
-        task();
+        current_task();
         m_immediate_mutex.lock();
     }
 }
 
-EventLoop::Timepoint EventLoop::process_deferred_tasks(Timepoint start_tp)
+TickType_t EventLoop::process_deferred_tasks(Timepoint start_timepoint)
 {
-    // TODO: Implement
-    return 0;
+    std::lock_guard lock(m_deferred_mutex);
+
+    DeferredTask current_deferred_task;
+    TickType_t next_delay_ticks = portMAX_DELAY;
+
+    while (!m_deferred_tasks.empty()) {
+        const Timepoint next_deadline = m_deferred_tasks.top().deadline;
+
+        if (next_deadline > start_timepoint) {
+            next_delay_ticks = pdMS_TO_TICKS(next_deadline - start_timepoint);
+            break;
+        }
+
+        m_deferred_tasks.pop_into(current_deferred_task);
+        m_deferred_mutex.unlock();
+        current_deferred_task.task();
+        m_deferred_mutex.lock();
+
+        // handle periodic tasks
+        if (current_deferred_task.period) {
+            current_deferred_task.deadline += current_deferred_task.period.value();
+            m_deferred_tasks.push(std::move(current_deferred_task));
+        }
+    }
+
+    return next_delay_ticks;
 }
 
 }  // namespace service

@@ -83,7 +83,7 @@ private:
 
     void worker_thread();
     void process_immediate_tasks();
-    Timepoint process_deferred_tasks(Timepoint start_tp);
+    TickType_t process_deferred_tasks(Timepoint start_timepoint);
 
     std::string m_name;
     get_time_cb_t m_get_time_cb;

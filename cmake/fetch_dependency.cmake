@@ -1,4 +1,6 @@
-macro(FetchDependency NAME GIT_REPO GIT_TAG)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/build/dependencies CACHE STRING "")
+
+macro(fetch_dependency NAME GIT_REPO GIT_TAG)
     string(TOUPPER ${NAME} NAME_UPPER)
     set(DEP_PATH "${NAME_UPPER}_PATH")
     

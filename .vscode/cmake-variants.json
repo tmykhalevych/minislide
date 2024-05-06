@@ -1,0 +1,35 @@
+{
+  "buildType": {
+    "default": "debug",
+    "choices": {
+      "debug": {
+        "short": "Debug",
+        "buildType": "Debug",
+        "description": "RP Pico debug build with no optimizations."
+      },
+      "release": {
+        "short": "Release",
+        "buildType": "Release",
+        "description": "RP Pico release build with optimizations."
+      },
+      "minsizerel": {
+        "short": "MinSizeRel",
+        "buildType": "MinSizeRel",
+        "description": "RP Pico release build optimized for minimal size."
+      },
+      "relwithdebinfo": {
+        "short": "RelWithDebInfo",
+        "buildType": "RelWithDebInfo",
+        "description": "RP Pico release build with debug information."
+      },
+      "host": {
+        "short": "Host",
+        "description": "Host ported build.",
+        "settings": {
+          "CMAKE_BUILD_TYPE": "Host",
+          "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/cmake/host_toolchain.cmake"
+        }
+      }
+    }
+  }
+}

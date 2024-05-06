@@ -2,5 +2,6 @@
 !/build/.gitkeep
 
 /.vscode
+!/.vscode/cmake-variants.json
 
 FreeRTOS*/

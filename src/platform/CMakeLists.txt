@@ -2,7 +2,6 @@ add_library(platform STATIC)
 set(PLATFOM_IMPL "")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Host")
-    include(host/toolchain.cmake)
     set(PLATFOM_IMPL host)
 else()
     set(PLATFOM_IMPL pico)
@@ -26,12 +25,10 @@ function(add_platform_post_build_steps target artifacts_dir)
     add_custom_command(
         TARGET ${application}
         POST_BUILD
-        COMMAND mkdir -p ${artifacts_dir} && cp ${CMAKE_CURRENT_BINARY_DIR}/${application}.* ${artifacts_dir}
+        COMMAND mkdir -p ${artifacts_dir} && cp ${CMAKE_CURRENT_BINARY_DIR}/${application}* ${artifacts_dir}
         COMMENT "Copying artifacts into '${artifacts_dir}'")
 
-    if (CMAKE_BUILD_TYPE STREQUAL "Host")
-        # TODO: add HOST post build steps
-    else()
+    if (NOT CMAKE_BUILD_TYPE STREQUAL "Host")
         pico_add_extra_outputs(${target})
 
         add_custom_command(
@@ -40,4 +37,10 @@ function(add_platform_post_build_steps target artifacts_dir)
             COMMAND ${CMAKE_SIZE_UTIL} --format=SysV ${artifacts_dir}/${application}.elf
             COMMENT "Dumping '${application}.elf' segments sizes")
     endif()
+
+    add_custom_command(
+        TARGET ${application}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/CMakeCache.txt
+        COMMENT "Cleaning up CMake cache file")
 endfunction()

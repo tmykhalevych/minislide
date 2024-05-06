@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-set(BUILD_DIR ${CMAKE_SOURCE_DIR}/build)
-set(FETCHCONTENT_BASE_DIR ${BUILD_DIR}/dependencies CACHE STRING "")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_dependency.cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 find_package(FreeRTOS  REQUIRED)
 find_package(RpPicoSDK REQUIRED)

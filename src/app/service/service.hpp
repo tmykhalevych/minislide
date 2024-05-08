@@ -36,8 +36,9 @@ concept ServiceImplInterface = requires(I s)
 }
 
 static constexpr size_t DEFAULT_TASK_QUEUE_CAPACITY = 10;
+static constexpr size_t DEFAULT_STACK_SIZE = configMINIMAL_STACK_SIZE * 2;
 
-template <typename ServiceImpl, size_t StackSize = configMINIMAL_STACK_SIZE,
+template <typename ServiceImpl, size_t StackSize = DEFAULT_STACK_SIZE,
           size_t ImmediateQueueCap = DEFAULT_TASK_QUEUE_CAPACITY, size_t DeferredQueueCap = DEFAULT_TASK_QUEUE_CAPACITY>
 class Service : public EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>
 {

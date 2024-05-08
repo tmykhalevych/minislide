@@ -1,33 +1,22 @@
 #pragma once
 
-#include <FreeRTOS.h>
-
-#include <led.hpp>
-#include <logger.hpp>
-#include <service.hpp>
-
-// clang-format off
-
-#define REQUIRED(val) if (!(val)) return false
-#define OPTIONAL(val) val
-
-// clang-format on
+#include <prohibit_copy_move.hpp>
 
 namespace app
 {
 
-[[nodiscard]] inline bool init()
+class App : public common::ProhibitCopyMove
 {
-    logger::create_and_start(logger::Severity::DEBUG);
+public:
+    App();
 
-    REQUIRED(service::create_and_start<LedService>());
+    void start() const;
 
-    return true;
-}
+private:
+    bool init_platform() const;
+    bool init_firmware() const;
 
-inline void start()
-{
-    vTaskStartScheduler();
-}
+    void init();
+};
 
 }  // namespace app

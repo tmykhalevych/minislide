@@ -6,6 +6,6 @@ set(application ${CMAKE_PROJECT_NAME})
 set(artifacts_dir ${CMAKE_BINARY_DIR}/out)
 
 add_executable(${application} main.cpp)
-target_link_libraries(${application} PRIVATE freertos platform app)
+target_link_libraries(${application} PRIVATE freertos app)
 
 add_platform_post_build_steps(${application} ${artifacts_dir})

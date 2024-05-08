@@ -1,6 +1,13 @@
 add_library(platform STATIC)
 set(PLATFOM_IMPL "")
 
+set(PREVIOUS_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE FILEPATH "")
+
+if ((NOT ${PREVIOUS_CMAKE_BUILD_TYPE} STREQUAL ${CMAKE_BUILD_TYPE}) AND
+    ((${PREVIOUS_CMAKE_BUILD_TYPE} STREQUAL "Host") OR (${CMAKE_BUILD_TYPE} STREQUAL "Host")))
+    message(FATAL_ERROR "Platform target changed, please clear CMake cache")
+endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Host")
     set(PLATFOM_IMPL host)
 else()
@@ -14,7 +21,7 @@ else()
     pico_find_compiler(PICO_SIZE ${PICO_GCC_TRIPLE}-size)
     set(CMAKE_SIZE_UTIL ${PICO_SIZE} CACHE FILEPATH "")
 
-    target_link_libraries(platform PUBLIC pico_float PRIVATE pico_stdlib pico_cyw43_arch_none)
+    target_link_libraries(platform PUBLIC pico_float freertos PRIVATE pico_stdlib pico_cyw43_arch_none)
 endif()
 
 target_include_directories(platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -37,10 +44,4 @@ function(add_platform_post_build_steps target artifacts_dir)
             COMMAND ${CMAKE_SIZE_UTIL} --format=SysV ${artifacts_dir}/${application}.elf
             COMMENT "Dumping '${application}.elf' segments sizes")
     endif()
-
-    add_custom_command(
-        TARGET ${application}
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/CMakeCache.txt
-        COMMENT "Cleaning up CMake cache file")
 endfunction()

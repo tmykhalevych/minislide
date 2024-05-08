@@ -1,26 +1,30 @@
 #include <FreeRTOS.h>
+#include <task.h>
 
 #include <app.hpp>
-#include <assert.hpp>
-#include <platform.hpp>
+
+#include <cstdio>
 
 int main()
 {
-    ASSERT(platform::init());
-    ASSERT(app::init());
-    app::start();
+    auto application = app::App();
+    application.start();
     return 0;
 }
 
 extern "C" void vApplicationMallocFailedHook()
 {
-    LOG_FATAL("allocation failure");
+    std::printf("allocation failure\n");
+    while (true) {
+    }
 }
 
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t task_hdl, char* task_name)
 {
     (void)task_hdl;
-    LOG_FATAL("stach overflow [tsk:%s]", task_name);
+    std::printf("stach overflow [tsk:%s]\n", task_name);
+    while (true) {
+    }
 }
 
 extern "C" void vAssertCalled(const char* file_name, unsigned line)

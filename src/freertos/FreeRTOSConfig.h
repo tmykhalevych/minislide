@@ -70,7 +70,7 @@ void vAssertCalled(const char* file_name, unsigned line);
 
 // Run time and task stats gathering related definitions
 #define configGENERATE_RUN_TIME_STATS           0
-#define configUSE_TRACE_FACILITY                1
+#define configUSE_TRACE_FACILITY                0
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
 
 // Software timer related definitions
@@ -86,6 +86,7 @@ void vAssertCalled(const char* file_name, unsigned line);
 
 // SMP port only
 #define configNUMBER_OF_CORES                   1
+#define configUSE_PASSIVE_IDLE_HOOK             0
 #define configTICK_CORE                         0
 #define configRUN_MULTIPLE_PRIORITIES           0
 

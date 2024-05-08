@@ -65,7 +65,7 @@ private:
         Milliseconds deadline;
         std::optional<Milliseconds> period = std::nullopt;
 
-        [[nodiscard]] bool operator<(const DeferredTask& other) const { return deadline < other.deadline; }
+        [[nodiscard]] bool operator<(const DeferredTask& other) const { return deadline > other.deadline; }
         [[nodiscard]] static TaskHandleImpl get_next_handle() { return next_handle++; }
 
     private:

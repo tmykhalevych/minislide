@@ -4,15 +4,26 @@
 #include <message.hpp>
 #include <service.hpp>
 #include <signal.hpp>
+#include <state.hpp>
 #include <status_led.hpp>
 
 namespace app
 {
 
-class LedSender : public service::Service<LedSender>, public service::DefaultSetup, public service::DefaultSuspendResume
+enum class LedSenderState : uint
+{
+    ANY
+};
+
+class LedSender : public service::Service<LedSender>,
+                  public service::StateKeeper<LedSender, LedSenderState>,
+                  public service::DefaultSetup,
+                  public service::DefaultSuspendResume
 {
 public:
     LedSender() : Service("LedSender") {}
+
+    State init_state() { return State::ANY; }
 
     void main()
     {
@@ -21,15 +32,15 @@ public:
     }
 
 private:
-    using State = platform::StatusLed::State;
+    using LedState = platform::StatusLed::State;
 
     SetLedState next_state()
     {
-        m_led_state = (m_led_state == State::ON) ? State::OFF : State::ON;
+        m_led_state = (m_led_state == LedState::ON) ? LedState::OFF : LedState::ON;
         return SetLedState{.value = m_led_state};
     }
 
-    State m_led_state = State::OFF;
+    LedState m_led_state = LedState::OFF;
 };
 
 }  // namespace app

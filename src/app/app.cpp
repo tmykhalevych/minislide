@@ -6,6 +6,7 @@
 #include <logger.hpp>
 #include <platform.hpp>
 #include <service.hpp>
+#include <state.hpp>
 
 #include <led_receiver.hpp>
 #include <led_sender.hpp>
@@ -45,6 +46,9 @@ bool App::init_firmware() const
 
     REQUIRED(service::create_and_start<LedReceiver>());
     REQUIRED(service::create_and_start<LedSender>());
+
+    auto led_sender_state = service::get_state_for<LedSender>();
+    LOG_INFO("led sender init state: %u", led_sender_state);
 
     return true;
 }

@@ -8,6 +8,7 @@
 #include <inplace_function.hpp>
 #include <logger.hpp>
 #include <mutex.hpp>
+#include <priority.hpp>
 #include <prohibit_copy_move.hpp>
 
 #include <etl/priority_queue.h>

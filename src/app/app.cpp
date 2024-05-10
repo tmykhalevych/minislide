@@ -5,6 +5,7 @@
 #include <assert.hpp>
 #include <logger.hpp>
 #include <platform.hpp>
+#include <priority.hpp>
 #include <service.hpp>
 #include <state.hpp>
 
@@ -19,8 +20,8 @@ namespace app
 
 App::App()
 {
-    const BaseType_t status =
-        xTaskCreate(common::bind_to<App, &App::init>, "app", configMINIMAL_STACK_SIZE, this, tskIDLE_PRIORITY, nullptr);
+    const BaseType_t status = xTaskCreate(common::bind_to<App, &App::init>, "app", configMINIMAL_STACK_SIZE, this,
+                                          freertos::prio::REAL_TIME, nullptr);
 
     ASSERT(status == pdPASS);
 }

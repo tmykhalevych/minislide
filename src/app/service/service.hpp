@@ -51,7 +51,8 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time, size_t prio = tskIDLE_PRIORITY)
+    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time,
+                     size_t prio = freertos::prio::LOW)
         : EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>(name, prio, get_time_cb)
     {}
 

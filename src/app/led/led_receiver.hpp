@@ -21,15 +21,11 @@ enum class LedSignal : uint
 
 class LedReceiver : public service::Service<LedReceiver>,
                     public service::MessageReceiver<LedReceiver, SetLedState>,
-                    public service::SignalReceiver<LedReceiver, LedSignal>
+                    public service::SignalReceiver<LedReceiver, LedSignal>,
+                    public service::DefaultService
 {
 public:
     LedReceiver() : Service("LedReceiver") {}
-
-    bool setup() { return true; }
-    bool try_suspend() { return true; }
-    bool try_resume() { return true; }
-    void main() {}
 
     void handle_message(Message msg)
     {

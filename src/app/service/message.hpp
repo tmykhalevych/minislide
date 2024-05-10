@@ -5,6 +5,7 @@
 #include <service.hpp>
 
 #include <concepts>
+#include <type_traits>
 #include <variant>
 
 namespace service
@@ -20,7 +21,10 @@ concept MessageReceiverImplConcept = requires(I mr)
 
 // clang-format on
 
-template <typename TDerived, typename... TMessages>
+template <typename T>
+concept MessageConcept = std::is_class_v<T>;
+
+template <typename TDerived, MessageConcept... TMessages>
 class MessageReceiver
 {
 protected:

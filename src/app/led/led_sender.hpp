@@ -9,14 +9,10 @@
 namespace app
 {
 
-class LedSender : public service::Service<LedSender>
+class LedSender : public service::Service<LedSender>, public service::DefaultSetup, public service::DefaultSuspendResume
 {
 public:
     LedSender() : Service("LedSender") {}
-
-    bool setup() { return true; }
-    bool try_suspend() { return true; }
-    bool try_resume() { return true; }
 
     void main()
     {

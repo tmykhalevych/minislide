@@ -5,7 +5,7 @@
 #include <service.hpp>
 
 #include <concepts>
-#include <variant>
+#include <type_traits>
 
 namespace service
 {
@@ -20,7 +20,10 @@ concept SignalReceiverImplConcept = requires(I mr)
 
 // clang-format on
 
-template <typename TDerived, typename TSignal>
+template <typename T>
+concept SignalConcept = std::is_enum_v<T> || std::is_integral_v<T>;
+
+template <typename TDerived, SignalConcept TSignal>
 class SignalReceiver
 {
 protected:

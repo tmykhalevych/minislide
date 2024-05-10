@@ -63,6 +63,29 @@ private:
     bool m_started = false;
 };
 
+class DefaultSetup
+{
+public:
+    bool setup() { return true; }
+};
+
+class DefaultSuspendResume
+{
+public:
+    bool try_suspend() { return true; }
+    bool try_resume() { return true; }
+};
+
+class DefaultMain
+{
+public:
+    void main() {}
+};
+
+class DefaultService : public DefaultSetup, public DefaultSuspendResume, public DefaultMain
+{
+};
+
 template <typename Impl, size_t S, size_t I, size_t D>
 bool Service<Impl, S, I, D>::start()
 {

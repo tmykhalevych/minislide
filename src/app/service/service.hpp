@@ -20,7 +20,7 @@ namespace service
 // clang-format off
 
 template <typename I>
-concept ServiceImplInterface = requires(I s)
+concept ServiceImplConcept = requires(I s)
 {
     { s.setup() } -> std::same_as<bool>;
     { s.main() } -> std::same_as<void>;
@@ -38,7 +38,7 @@ concept ServiceImplInterface = requires(I s)
 static constexpr size_t DEFAULT_TASK_QUEUE_CAPACITY = 10;
 static constexpr size_t DEFAULT_STACK_SIZE = configMINIMAL_STACK_SIZE * 2;
 
-template <typename ServiceImpl, size_t StackSize = DEFAULT_STACK_SIZE,
+template <typename TDerived, size_t StackSize = DEFAULT_STACK_SIZE,
           size_t ImmediateQueueCap = DEFAULT_TASK_QUEUE_CAPACITY, size_t DeferredQueueCap = DEFAULT_TASK_QUEUE_CAPACITY>
 class Service : public EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>
 {
@@ -56,7 +56,7 @@ protected:
     {}
 
 private:
-    ServiceImplInterface auto& impl() { return static_cast<ServiceImpl&>(*this); }
+    ServiceImplConcept auto& impl() { return static_cast<TDerived&>(*this); }
 
     // TODO: consider making these atomic
     bool m_running = false;
@@ -124,16 +124,16 @@ template <typename Derived, template <typename, size_t, size_t, size_t> class Ba
 using is_derived_from_service = typename is_derived_from_service_impl<Derived, Base>::type;
 
 template <typename S>
-concept ServiceInterface = is_derived_from_service<S, Service>::value;
+concept ServiceConcept = is_derived_from_service<S, Service>::value;
 
-template <ServiceInterface S>
+template <ServiceConcept S>
 bool create_and_start()
 {
     common::Singleton<S>::emplace();
     return common::Singleton<S>::instance()->start();
 }
 
-template <ServiceInterface S>
+template <ServiceConcept S>
 common::Singleton<S>::Ptr access()
 {
     typename common::Singleton<S>::Ptr service = common::Singleton<S>::instance();

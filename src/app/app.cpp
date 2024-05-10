@@ -3,10 +3,12 @@
 
 #include <app.hpp>
 #include <assert.hpp>
-#include <led.hpp>
 #include <logger.hpp>
 #include <platform.hpp>
 #include <service.hpp>
+
+#include <led_receiver.hpp>
+#include <led_sender.hpp>
 
 #define REQUIRED(val) \
     if (!(val)) return false
@@ -41,7 +43,8 @@ bool App::init_firmware() const
 {
     LOG_INFO("init firmware");
 
-    REQUIRED(service::create_and_start<LedService>());
+    REQUIRED(service::create_and_start<LedReceiver>());
+    REQUIRED(service::create_and_start<LedSender>());
 
     return true;
 }

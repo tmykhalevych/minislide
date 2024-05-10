@@ -24,6 +24,18 @@ using Task = common::InplaceFunction<void()>;
 using Milliseconds = TickType_t;
 using get_time_cb_t = common::InplaceFunction<Milliseconds()>;
 
+// clang-format off
+
+template <typename I>
+concept EventLoopConcept = requires(I el)
+{
+    { el.run_immediate(std::declval<Task>()) } -> std::same_as<void>;
+    { el.run_after(std::declval<Task>(), Milliseconds{}) } -> std::same_as<typename I::TaskHandle>;
+    { el.run_periodic(std::declval<Task>(), Milliseconds{}, Milliseconds{}) } -> std::same_as<typename I::TaskHandle>;
+};
+
+// clang-format on
+
 template <size_t StackSize, size_t ImmediateQueueCapacity, size_t DeferredQueueCapacity>
 class EventLoop : public common::ProhibitCopyMove
 {

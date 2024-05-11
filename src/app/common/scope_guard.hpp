@@ -5,7 +5,7 @@
 #include <functional>
 #include <optional>
 
-namespace common
+namespace cmn
 {
 
 /// @brief Basic scope guard. Invokes final action when out of scope. Doesn't invoke when canceled.
@@ -28,4 +28,4 @@ private:
     std::optional<FA> m_action;
 };
 
-}  // namespace common
+}  // namespace cmn

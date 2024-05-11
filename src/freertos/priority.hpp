@@ -3,7 +3,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-namespace freertos::prio
+namespace fr::prio
 {
 
 enum : UBaseType_t
@@ -15,6 +15,6 @@ enum : UBaseType_t
     MAX
 };
 
-}  // namespace freertos::prio
+}  // namespace fr::prio
 
-static_assert(freertos::prio::MAX == configMAX_PRIORITIES);
+static_assert(fr::prio::MAX == configMAX_PRIORITIES);

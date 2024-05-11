@@ -46,7 +46,7 @@ private:
 template <typename TSetvice, typename TMessage>
 void send_message_to(TMessage&& msg)
 {
-    typename common::Singleton<TSetvice>::Ptr service = common::Singleton<TSetvice>::instance();
+    typename cmn::Singleton<TSetvice>::Ptr service = cmn::Singleton<TSetvice>::instance();
     ASSERT(service);
     service->receive_message(std::move(msg));
 }

@@ -1,7 +1,7 @@
 #include <pico/cyw43_arch.h>
 #include <status_led.hpp>
 
-using namespace platform;
+using namespace pfm;
 
 void StatusLed::set_state(State state)
 {

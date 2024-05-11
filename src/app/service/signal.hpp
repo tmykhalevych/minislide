@@ -45,7 +45,7 @@ private:
 template <typename TSetvice, typename TSignal>
 void send_signal_to(TSignal&& signal)
 {
-    typename common::Singleton<TSetvice>::Ptr service = common::Singleton<TSetvice>::instance();
+    typename cmn::Singleton<TSetvice>::Ptr service = cmn::Singleton<TSetvice>::instance();
     ASSERT(service);
     service->receive_signal(signal);
 }

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-using namespace platform;
+using namespace pfm;
 
 void StatusLed::set_state(State state)
 {

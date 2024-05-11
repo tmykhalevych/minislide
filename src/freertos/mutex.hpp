@@ -8,13 +8,13 @@
 
 #include <mutex>
 
-namespace freertos
+namespace fr
 {
 
 namespace details
 {
 
-class MutexBase : public common::ProhibitCopy
+class MutexBase : public cmn::ProhibitCopy
 {
 public:
     MutexBase(SemaphoreHandle_t hdl) : m_hdl(hdl) { ASSERT(m_hdl); }
@@ -46,4 +46,4 @@ public:
     void unlock() { ASSERT(xSemaphoreGiveRecursive(m_hdl)); }
 };
 
-}  // namespace freertos
+}  // namespace fr

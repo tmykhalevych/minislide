@@ -51,8 +51,7 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time,
-                     size_t prio = freertos::prio::LOW)
+    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time, size_t prio = fr::prio::LOW)
         : EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>(name, prio, get_time_cb)
     {}
 
@@ -153,14 +152,14 @@ concept ServiceConcept = is_derived_from_service<S, Service>::value;
 template <ServiceConcept S>
 bool create_and_start()
 {
-    common::Singleton<S>::emplace();
-    return common::Singleton<S>::instance()->start();
+    cmn::Singleton<S>::emplace();
+    return cmn::Singleton<S>::instance()->start();
 }
 
 template <ServiceConcept S>
-common::Singleton<S>::Ptr access()
+cmn::Singleton<S>::Ptr access()
 {
-    typename common::Singleton<S>::Ptr service = common::Singleton<S>::instance();
+    typename cmn::Singleton<S>::Ptr service = cmn::Singleton<S>::instance();
     ASSERT(service);
     return service;
 }

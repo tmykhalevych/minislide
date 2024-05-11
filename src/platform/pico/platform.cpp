@@ -3,7 +3,7 @@
 #include <pico/cyw43_arch.h>
 #include <pico/stdlib.h>
 
-namespace platform
+namespace pfm
 {
 
 bool init()
@@ -14,4 +14,4 @@ bool init()
     return true;
 }
 
-}  // namespace platform
+}  // namespace pfm

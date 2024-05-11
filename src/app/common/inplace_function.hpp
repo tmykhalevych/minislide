@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace common
+namespace cmn
 {
 
 /// @brief Default callable object size for InplaceFunction
@@ -179,4 +179,4 @@ private:
     mutable std::array<uint8_t, Capacity> m_storage;
 };
 
-}  // namespace common
+}  // namespace cmn

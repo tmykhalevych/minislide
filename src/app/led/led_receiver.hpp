@@ -11,7 +11,7 @@ namespace app
 
 struct SetLedState
 {
-    platform::StatusLed::State value;
+    pfm::StatusLed::State value;
 };
 
 enum class LedSignal : uint
@@ -29,12 +29,11 @@ public:
 
     void handle_message(Message msg)
     {
-        std::visit(common::Alternatives{[this](SetLedState s) {
-                                            LOG_INFO("LED is %s",
-                                                     (s.value == platform::StatusLed::State::ON) ? "ON" : "OFF");
-                                            platform::StatusLed::set_state(s.value);
-                                        },
-                                        common::Alternative::ignore},
+        std::visit(cmn::Alternatives{[this](SetLedState s) {
+                                         LOG_INFO("LED is %s", (s.value == pfm::StatusLed::State::ON) ? "ON" : "OFF");
+                                         pfm::StatusLed::set_state(s.value);
+                                     },
+                                     cmn::Alternative::ignore},
                    msg);
     }
 

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace platform
+namespace pfm
 {
 
 bool init()
@@ -11,4 +11,4 @@ bool init()
     return true;
 }
 
-}  // namespace platform
+}  // namespace pfm

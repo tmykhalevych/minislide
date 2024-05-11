@@ -2,7 +2,7 @@
 
 #include <optional>
 
-namespace common
+namespace cmn
 {
 
 /// @brief Singleton helper. Support construction with params and accesing
@@ -27,4 +27,4 @@ private:
     inline static std::optional<T> m_instance = std::nullopt;
 };
 
-}  // namespace common
+}  // namespace cmn

@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    using LedState = platform::StatusLed::State;
+    using LedState = pfm::StatusLed::State;
 
     SetLedState next_state()
     {

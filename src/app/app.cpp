@@ -20,8 +20,8 @@ namespace app
 
 App::App()
 {
-    const BaseType_t status = xTaskCreate(common::bind_to<App, &App::init>, "app", configMINIMAL_STACK_SIZE, this,
-                                          freertos::prio::REAL_TIME, nullptr);
+    const BaseType_t status =
+        xTaskCreate(cmn::bind_to<App, &App::init>, "app", configMINIMAL_STACK_SIZE, this, fr::prio::REAL_TIME, nullptr);
 
     ASSERT(status == pdPASS);
 }
@@ -33,7 +33,7 @@ void App::start() const
 
 bool App::init_platform() const
 {
-    bool res = platform::init();
+    bool res = pfm::init();
 
     logger::create_and_start(logger::Severity::DEBUG);
     LOG_INFO("init platform");

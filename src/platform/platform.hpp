@@ -1,8 +1,8 @@
 #pragma once
 
-namespace platform
+namespace pfm
 {
 
 [[nodiscard]] bool init();
 
-}  // namespace platform
+}  // namespace pfm

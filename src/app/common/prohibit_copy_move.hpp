@@ -1,6 +1,6 @@
 #pragma once
 
-namespace common
+namespace cmn
 {
 
 /// @brief Helper class to prohibit derived class copy operations
@@ -32,4 +32,4 @@ protected:
     ProhibitCopyMove() = default;
 };
 
-}  // namespace common
+}  // namespace cmn

@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace common
+namespace cmn
 {
 
 template <typename T>
@@ -14,4 +14,4 @@ void bind_to(void* context)
     std::invoke(F, static_cast<T*>(context));
 }
 
-}  // namespace common
+}  // namespace cmn

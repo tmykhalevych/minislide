@@ -1,6 +1,6 @@
 #pragma once
 
-namespace common
+namespace cmn
 {
 
 struct Alternative
@@ -17,4 +17,4 @@ struct Alternatives : A...
 template <class... A>
 Alternatives(A...) -> Alternatives<A...>;
 
-}  // namespace common
+}  // namespace cmn

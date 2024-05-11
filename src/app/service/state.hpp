@@ -49,7 +49,7 @@ protected:
 private:
     StateKeeperImplConcept auto& impl() { return static_cast<TDerived&>(*this); }
 
-    mutable freertos::Mutex m_state_mutex;
+    mutable fr::Mutex m_state_mutex;
     State m_state;
 };
 
@@ -71,7 +71,7 @@ concept StateKeeperConcept = is_derived_from_state_keeper<T, StateKeeper>::value
 template <StateKeeperConcept T>
 typename T::State get_state_for()
 {
-    typename common::Singleton<T>::Ptr service = common::Singleton<T>::instance();
+    typename cmn::Singleton<T>::Ptr service = cmn::Singleton<T>::instance();
     ASSERT(service);
     return service->get_state();
 }

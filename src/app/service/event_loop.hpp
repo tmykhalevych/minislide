@@ -21,9 +21,9 @@
 namespace service
 {
 
-using Task = common::InplaceFunction<void()>;
+using Task = cmn::InplaceFunction<void()>;
 using Milliseconds = TickType_t;
-using get_time_cb_t = common::InplaceFunction<Milliseconds()>;
+using get_time_cb_t = cmn::InplaceFunction<Milliseconds()>;
 
 // clang-format off
 
@@ -38,7 +38,7 @@ concept EventLoopConcept = requires(I el)
 // clang-format on
 
 template <size_t StackSize, size_t ImmediateQueueCapacity, size_t DeferredQueueCapacity>
-class EventLoop : public common::ProhibitCopyMove
+class EventLoop : public cmn::ProhibitCopyMove
 {
 private:
     using TaskHandleImpl = uint;
@@ -70,6 +70,8 @@ protected:
     void suspend();
     void resume();
 
+    std::string_view name() const { return pcTaskGetName(m_worker_handle); }
+
 private:
     struct DeferredTask
     {
@@ -99,11 +101,11 @@ private:
     get_time_cb_t m_get_time_cb;
 
     etl::queue<Task, ImmediateQueueCapacity> m_immediate_tasks;
-    freertos::RecursiveMutex m_immediate_mutex;
+    fr::RecursiveMutex m_immediate_mutex;
 
     etl::priority_queue<DeferredTask, DeferredQueueCapacity> m_deferred_tasks;
     etl::unordered_set<TaskHandleImpl, DeferredQueueCapacity> m_deferred_handles;
-    freertos::RecursiveMutex m_deferred_mutex;
+    fr::RecursiveMutex m_deferred_mutex;
 
     TaskHandle_t m_worker_handle;
     EventGroupHandle_t m_worker_events;
@@ -118,7 +120,7 @@ EventLoop<S, I, D>::EventLoop(std::string_view name, size_t prio, get_time_cb_t 
     : m_get_time_cb(std::move(get_time_cb)), m_worker_events(xEventGroupCreate())
 {
     const BaseType_t status =
-        xTaskCreate(common::bind_to<EventLoop<S, I, D>, &EventLoop::worker_thread>, name.data(),
+        xTaskCreate(cmn::bind_to<EventLoop<S, I, D>, &EventLoop::worker_thread>, name.data(),
                     static_cast<configSTACK_DEPTH_TYPE>(S), this, static_cast<UBaseType_t>(prio), &m_worker_handle);
 
     ASSERT(m_worker_events);

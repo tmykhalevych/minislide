@@ -22,7 +22,7 @@ static constexpr auto MAX_HEADER_LENGTH = 80;
 static constexpr auto ENTRIES_DELIMITER = "\n";
 
 using SourceLoc = std::experimental::source_location;
-using get_timestamp_cb_t = common::InplaceFunction<std::time_t()>;
+using get_timestamp_cb_t = cmn::InplaceFunction<std::time_t()>;
 
 enum class Severity : uint8_t
 {
@@ -50,7 +50,7 @@ private:
     std::array<char, MAX_HEADER_LENGTH> m_entry_header;
     std::array<char, MAX_MESSAGE_LENGTH> m_entry_body;
 
-    freertos::Mutex m_mutex;
+    fr::Mutex m_mutex;
 };
 
 template <typename... TArgs>
@@ -89,12 +89,12 @@ void Logger::log(SourceLoc loc, Severity sev, std::string_view format, TArgs&&..
 inline void create_and_start(
     Severity sev = Severity::INFO, get_timestamp_cb_t get_timestamp_cb = [] { return std::time(nullptr); })
 {
-    common::Singleton<Logger>::emplace(sev, std::move(get_timestamp_cb));
+    cmn::Singleton<Logger>::emplace(sev, std::move(get_timestamp_cb));
 }
 
-inline common::Singleton<Logger>::Ptr access()
+inline cmn::Singleton<Logger>::Ptr access()
 {
-    typename common::Singleton<Logger>::Ptr logger = common::Singleton<Logger>::instance();
+    typename cmn::Singleton<Logger>::Ptr logger = cmn::Singleton<Logger>::instance();
     ASSERT(logger);
     return logger;
 }

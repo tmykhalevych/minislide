@@ -5,7 +5,7 @@
 namespace app
 {
 
-class App : public common::ProhibitCopyMove
+class App : public cmn::ProhibitCopyMove
 {
 public:
     App();

@@ -29,12 +29,10 @@ public:
 
     void handle_message(Message msg)
     {
-        std::visit(cmn::Alternatives{[this](SetLedState s) {
-                                         LOG_INFO("LED is %s", (s.value == bsp::StatusLed::State::ON) ? "ON" : "OFF");
-                                         bsp::StatusLed::set_state(s.value);
-                                     },
-                                     cmn::Alternative::ignore},
-                   msg);
+        cmn::dispatch(msg, [this](SetLedState s) {
+            LOG_INFO("LED is %s", (s.value == bsp::StatusLed::State::ON) ? "ON" : "OFF");
+            bsp::StatusLed::set_state(s.value);
+        });
     }
 
     void handle_signal(Signal sig) { LOG_INFO("Reseived signal: %u", sig); }

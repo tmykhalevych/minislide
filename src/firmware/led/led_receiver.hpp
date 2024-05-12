@@ -29,7 +29,7 @@ public:
 
     void handle_message(Message msg)
     {
-        cmn::dispatch(msg, [this](SetLedState s) {
+        svc::dispatch_message(msg, [this](SetLedState s) {
             LOG_INFO("LED is %s", (s.value == bsp::StatusLed::State::ON) ? "ON" : "OFF");
             bsp::StatusLed::set_state(s.value);
         });

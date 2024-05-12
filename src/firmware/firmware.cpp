@@ -33,15 +33,15 @@ void Firmware::start() const
 
 bool Firmware::init_bsp() const
 {
-    bool res = bsp::init();
-
     logger::create_and_start(logger::Severity::DEBUG);
+
+    bool res = bsp::init();
     LOG_INFO("init bsp");
 
     return res;
 }
 
-bool Firmware::init_firmware() const
+bool Firmware::init_services() const
 {
     LOG_INFO("init firmware");
 
@@ -57,7 +57,7 @@ bool Firmware::init_firmware() const
 void Firmware::init()
 {
     ASSERT(init_bsp());
-    ASSERT(init_firmware());
+    ASSERT(init_services());
 
     vTaskDelete(nullptr);
 }

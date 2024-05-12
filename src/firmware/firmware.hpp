@@ -14,7 +14,7 @@ public:
 
 private:
     bool init_bsp() const;
-    bool init_firmware() const;
+    bool init_services() const;
 
     void init();
 };

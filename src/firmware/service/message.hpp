@@ -2,6 +2,7 @@
 
 #include <alternatives.hpp>
 #include <event_loop.hpp>
+#include <logger.hpp>
 #include <service.hpp>
 
 #include <concepts>
@@ -55,6 +56,14 @@ void send_message_to(TMessage&& msg)
     typename cmn::Singleton<TSetvice>::Ptr service = cmn::Singleton<TSetvice>::instance();
     ASSERT(service);
     service->receive_message(std::move(msg));
+}
+
+static constexpr auto DEFAULT_MESSAGE_HANDLER = [](auto) { LOG_WARN("message ignored"); };
+
+template <MessageConcept M, typename... THandlers>
+void dispatch_message(M message, THandlers&&... handlers)
+{
+    std::visit(cmn::Alternatives{std::forward<THandlers>(handlers)..., DEFAULT_MESSAGE_HANDLER}, message);
 }
 
 }  // namespace fw::svc

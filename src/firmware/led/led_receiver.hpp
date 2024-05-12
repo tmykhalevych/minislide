@@ -6,12 +6,12 @@
 #include <signal.hpp>
 #include <status_led.hpp>
 
-namespace app
+namespace fw
 {
 
 struct SetLedState
 {
-    pfm::StatusLed::State value;
+    bsp::StatusLed::State value;
 };
 
 enum class LedSignal : uint
@@ -30,8 +30,8 @@ public:
     void handle_message(Message msg)
     {
         std::visit(cmn::Alternatives{[this](SetLedState s) {
-                                         LOG_INFO("LED is %s", (s.value == pfm::StatusLed::State::ON) ? "ON" : "OFF");
-                                         pfm::StatusLed::set_state(s.value);
+                                         LOG_INFO("LED is %s", (s.value == bsp::StatusLed::State::ON) ? "ON" : "OFF");
+                                         bsp::StatusLed::set_state(s.value);
                                      },
                                      cmn::Alternative::ignore},
                    msg);
@@ -40,4 +40,4 @@ public:
     void handle_signal(Signal sig) { LOG_INFO("Reseived signal: %u", sig); }
 };
 
-}  // namespace app
+}  // namespace fw

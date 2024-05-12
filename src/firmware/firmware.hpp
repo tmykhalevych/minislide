@@ -2,21 +2,21 @@
 
 #include <prohibit_copy_move.hpp>
 
-namespace app
+namespace fw
 {
 
-class App : public cmn::ProhibitCopyMove
+class Firmware : public cmn::ProhibitCopyMove
 {
 public:
-    App();
+    Firmware();
 
     void start() const;
 
 private:
-    bool init_platform() const;
+    bool init_bsp() const;
     bool init_firmware() const;
 
     void init();
 };
 
-}  // namespace app
+}  // namespace fw

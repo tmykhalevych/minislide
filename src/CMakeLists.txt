@@ -1,11 +1,11 @@
-add_subdirectory(platform)
+add_subdirectory(bsp)
 add_subdirectory(freertos)
-add_subdirectory(app)
+add_subdirectory(firmware)
 
 set(application ${CMAKE_PROJECT_NAME})
 set(artifacts_dir ${CMAKE_BINARY_DIR}/out)
 
 add_executable(${application} main.cpp)
-target_link_libraries(${application} PRIVATE freertos app)
+target_link_libraries(${application} PRIVATE freertos firmware)
 
-add_platform_post_build_steps(${application} ${artifacts_dir})
+add_bsp_post_build_steps(${application} ${artifacts_dir})

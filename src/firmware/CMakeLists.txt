@@ -3,12 +3,12 @@ add_subdirectory(common)
 add_subdirectory(service)
 add_subdirectory(led)
 
-add_library(app STATIC app.cpp)
-target_include_directories(app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(app
+add_library(firmware STATIC firmware.cpp)
+target_include_directories(firmware PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(firmware
     PRIVATE
         freertos
-        platform
+        bsp
         common
         logger
         service

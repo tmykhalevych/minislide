@@ -7,7 +7,7 @@
 #include <state.hpp>
 #include <status_led.hpp>
 
-namespace app
+namespace fw
 {
 
 enum class LedSenderState : uint
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    using LedState = pfm::StatusLed::State;
+    using LedState = bsp::StatusLed::State;
 
     SetLedState next_state()
     {
@@ -43,4 +43,4 @@ private:
     LedState m_led_state = LedState::OFF;
 };
 
-}  // namespace app
+}  // namespace fw

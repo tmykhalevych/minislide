@@ -1,10 +1,10 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include <app.hpp>
 #include <assert.hpp>
+#include <bsp.hpp>
+#include <firmware.hpp>
 #include <logger.hpp>
-#include <platform.hpp>
 #include <priority.hpp>
 #include <service.hpp>
 #include <state.hpp>
@@ -15,33 +15,33 @@
 #define REQUIRED(val) \
     if (!(val)) return false
 
-namespace app
+namespace fw
 {
 
-App::App()
+Firmware::Firmware()
 {
-    const BaseType_t status =
-        xTaskCreate(cmn::bind_to<App, &App::init>, "app", configMINIMAL_STACK_SIZE, this, fr::prio::REAL_TIME, nullptr);
+    const BaseType_t status = xTaskCreate(cmn::bind_to<Firmware, &Firmware::init>, "fw", configMINIMAL_STACK_SIZE, this,
+                                          fr::prio::REAL_TIME, nullptr);
 
     ASSERT(status == pdPASS);
 }
 
-void App::start() const
+void Firmware::start() const
 {
     vTaskStartScheduler();
 }
 
-bool App::init_platform() const
+bool Firmware::init_bsp() const
 {
-    bool res = pfm::init();
+    bool res = bsp::init();
 
     logger::create_and_start(logger::Severity::DEBUG);
-    LOG_INFO("init platform");
+    LOG_INFO("init bsp");
 
     return res;
 }
 
-bool App::init_firmware() const
+bool Firmware::init_firmware() const
 {
     LOG_INFO("init firmware");
 
@@ -54,12 +54,12 @@ bool App::init_firmware() const
     return true;
 }
 
-void App::init()
+void Firmware::init()
 {
-    ASSERT(init_platform());
+    ASSERT(init_bsp());
     ASSERT(init_firmware());
 
     vTaskDelete(nullptr);
 }
 
-}  // namespace app
+}  // namespace fw

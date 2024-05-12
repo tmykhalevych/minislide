@@ -14,7 +14,7 @@
 #include <string>
 #include <string_view>
 
-namespace svc
+namespace fw::svc
 {
 
 // clang-format off
@@ -164,4 +164,4 @@ cmn::Singleton<S>::Ptr access()
     return service;
 }
 
-}  // namespace svc
+}  // namespace fw::svc

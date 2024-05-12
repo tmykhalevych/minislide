@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <variant>
 
-namespace svc
+namespace fw::svc
 {
 
 // clang-format off
@@ -57,4 +57,4 @@ void send_message_to(TMessage&& msg)
     service->receive_message(std::move(msg));
 }
 
-}  // namespace svc
+}  // namespace fw::svc

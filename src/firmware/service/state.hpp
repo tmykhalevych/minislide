@@ -5,7 +5,7 @@
 
 #include <mutex.hpp>
 
-namespace svc
+namespace fw::svc
 {
 
 // clang-format off
@@ -76,4 +76,4 @@ typename T::State get_state_for()
     return service->get_state();
 }
 
-}  // namespace svc
+}  // namespace fw::svc

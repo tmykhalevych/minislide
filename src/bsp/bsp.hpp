@@ -1,8 +1,8 @@
 #pragma once
 
-namespace pfm
+namespace bsp
 {
 
 [[nodiscard]] bool init();
 
-}  // namespace pfm
+}  // namespace bsp

@@ -7,7 +7,7 @@
 #include <concepts>
 #include <type_traits>
 
-namespace svc
+namespace fw::svc
 {
 
 // clang-format off
@@ -50,4 +50,4 @@ void send_signal_to(TSignal&& signal)
     service->receive_signal(signal);
 }
 
-}  // namespace svc
+}  // namespace fw::svc

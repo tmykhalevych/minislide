@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 
-namespace pfm
+namespace bsp
 {
 
 class StatusLed
@@ -17,4 +17,4 @@ public:
     static void set_state(State state);
 };
 
-}  // namespace pfm
+}  // namespace bsp

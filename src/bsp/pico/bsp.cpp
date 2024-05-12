@@ -1,9 +1,9 @@
-#include <platform.hpp>
+#include <bsp.hpp>
 
 #include <pico/cyw43_arch.h>
 #include <pico/stdlib.h>
 
-namespace pfm
+namespace bsp
 {
 
 bool init()
@@ -14,4 +14,4 @@ bool init()
     return true;
 }
 
-}  // namespace pfm
+}  // namespace bsp

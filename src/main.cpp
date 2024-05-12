@@ -1,14 +1,14 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include <app.hpp>
+#include <firmware.hpp>
 
 #include <cstdio>
 
 int main()
 {
-    auto application = app::App();
-    application.start();
+    auto firmware = fw::Firmware();
+    firmware.start();
     return 0;
 }
 

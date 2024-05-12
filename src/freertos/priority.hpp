@@ -9,7 +9,7 @@ namespace fr::prio
 enum : UBaseType_t
 {
     LOW = 0,
-    MEDIUM,
+    NORMAL,
     HIGH,
     REAL_TIME,
     MAX

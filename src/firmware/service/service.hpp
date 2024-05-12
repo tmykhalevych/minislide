@@ -18,7 +18,6 @@ namespace fw::svc
 {
 
 // clang-format off
-
 template <typename I>
 concept ServiceImplConcept = requires(I s)
 {
@@ -27,7 +26,6 @@ concept ServiceImplConcept = requires(I s)
     { s.try_suspend() } -> std::same_as<bool>;
     { s.try_resume() } -> std::same_as<bool>;
 };
-
 // clang-format on
 
 [[nodiscard]] inline Milliseconds get_boot_time()
@@ -37,9 +35,14 @@ concept ServiceImplConcept = requires(I s)
 
 static constexpr size_t DEFAULT_TASK_QUEUE_CAPACITY = 10;
 static constexpr size_t DEFAULT_STACK_SIZE = configMINIMAL_STACK_SIZE * 2;
+static constexpr auto DEFAULT_PRIO = fr::prio::NORMAL;
 
-template <typename TDerived, size_t StackSize = DEFAULT_STACK_SIZE,
-          size_t ImmediateQueueCap = DEFAULT_TASK_QUEUE_CAPACITY, size_t DeferredQueueCap = DEFAULT_TASK_QUEUE_CAPACITY>
+// clang-format off
+template <typename TDerived,
+          size_t StackSize = DEFAULT_STACK_SIZE,
+          size_t ImmediateQueueCap = DEFAULT_TASK_QUEUE_CAPACITY,
+          size_t DeferredQueueCap = DEFAULT_TASK_QUEUE_CAPACITY>
+// clang-format on
 class Service : public EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>
 {
 public:
@@ -51,7 +54,7 @@ public:
     [[nodiscard]] bool is_running() const { return m_running; };
 
 protected:
-    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time, size_t prio = fr::prio::LOW)
+    explicit Service(std::string_view name, get_time_cb_t get_time_cb = get_boot_time, size_t prio = DEFAULT_PRIO)
         : EventLoop<StackSize, ImmediateQueueCap, DeferredQueueCap>(name, prio, get_time_cb)
     {}
 

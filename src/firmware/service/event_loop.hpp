@@ -26,7 +26,6 @@ using Milliseconds = TickType_t;
 using get_time_cb_t = cmn::InplaceFunction<Milliseconds()>;
 
 // clang-format off
-
 template <typename I>
 concept EventLoopConcept = requires(I el)
 {
@@ -34,7 +33,6 @@ concept EventLoopConcept = requires(I el)
     { el.run_after(std::declval<Task>(), Milliseconds{}) } -> std::same_as<typename I::TaskHandle>;
     { el.run_periodic(std::declval<Task>(), Milliseconds{}, Milliseconds{}) } -> std::same_as<typename I::TaskHandle>;
 };
-
 // clang-format on
 
 template <size_t StackSize, size_t ImmediateQueueCapacity, size_t DeferredQueueCapacity>

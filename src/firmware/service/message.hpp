@@ -13,13 +13,11 @@ namespace fw::svc
 {
 
 // clang-format off
-
 template <typename I>
 concept MessageReceiverImplConcept = requires(I mr)
 {
     { mr.handle_message(std::declval<typename I::Message>()) } -> std::same_as<void>;
 };
-
 // clang-format on
 
 template <typename, typename>
@@ -61,7 +59,7 @@ void send_message_to(TMessage&& msg)
 static constexpr auto DEFAULT_MESSAGE_HANDLER = [](auto) { LOG_WARN("message ignored"); };
 
 template <MessageConcept M, typename... THandlers>
-void dispatch_message(M message, THandlers&&... handlers)
+void dispatch_message(const M& message, THandlers&&... handlers)
 {
     std::visit(cmn::Alternatives{std::forward<THandlers>(handlers)..., DEFAULT_MESSAGE_HANDLER}, message);
 }

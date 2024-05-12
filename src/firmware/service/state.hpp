@@ -9,13 +9,11 @@ namespace fw::svc
 {
 
 // clang-format off
-
 template <typename I>
 concept StateKeeperImplConcept = requires(I mr)
 {
     { mr.init_state() } -> std::same_as<typename I::State>;
 };
-
 // clang-format on
 
 template <typename T>

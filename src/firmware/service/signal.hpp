@@ -11,13 +11,11 @@ namespace fw::svc
 {
 
 // clang-format off
-
 template <typename I>
 concept SignalReceiverImplConcept = requires(I mr)
 {
     { mr.handle_signal(std::declval<typename I::Signal>()) } -> std::same_as<void>;
 };
-
 // clang-format on
 
 template <typename T>

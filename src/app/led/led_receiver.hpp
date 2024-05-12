@@ -19,10 +19,10 @@ enum class LedSignal : uint
     HELLO
 };
 
-class LedReceiver : public service::Service<LedReceiver>,
-                    public service::MessageReceiver<LedReceiver, SetLedState>,
-                    public service::SignalReceiver<LedReceiver, LedSignal>,
-                    public service::DefaultService
+class LedReceiver : public svc::Service<LedReceiver>,
+                    public svc::MessageReceiver<LedReceiver, svc::MessageList<SetLedState>>,
+                    public svc::SignalReceiver<LedReceiver, LedSignal>,
+                    public svc::DefaultService
 {
 public:
     LedReceiver() : Service("LedReceiver") {}

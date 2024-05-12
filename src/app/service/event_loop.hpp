@@ -18,7 +18,7 @@
 #include <optional>
 #include <string_view>
 
-namespace service
+namespace svc
 {
 
 using Task = cmn::InplaceFunction<void()>;
@@ -302,4 +302,4 @@ TickType_t EventLoop<S, I, D>::process_deferred_tasks(Milliseconds start_timepoi
     return next_delay_ticks;
 }
 
-}  // namespace service
+}  // namespace svc

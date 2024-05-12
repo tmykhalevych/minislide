@@ -15,10 +15,10 @@ enum class LedSenderState : uint
     ANY
 };
 
-class LedSender : public service::Service<LedSender>,
-                  public service::StateKeeper<LedSender, LedSenderState>,
-                  public service::DefaultSetup,
-                  public service::DefaultSuspendResume
+class LedSender : public svc::Service<LedSender>,
+                  public svc::StateKeeper<LedSender, LedSenderState>,
+                  public svc::DefaultSetup,
+                  public svc::DefaultSuspendResume
 {
 public:
     LedSender() : Service("LedSender") {}
@@ -27,8 +27,8 @@ public:
 
     void main()
     {
-        run_periodic([this] { service::send_message_to<LedReceiver>(next_state()); }, 2'000);
-        run_periodic([] { service::send_signal_to<LedReceiver>(LedSignal::HELLO); }, 5'000);
+        run_periodic([this] { svc::send_message_to<LedReceiver>(next_state()); }, 2'000);
+        run_periodic([] { svc::send_signal_to<LedReceiver>(LedSignal::HELLO); }, 5'000);
     }
 
 private:

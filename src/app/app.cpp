@@ -45,10 +45,10 @@ bool App::init_firmware() const
 {
     LOG_INFO("init firmware");
 
-    REQUIRED(service::create_and_start<LedReceiver>());
-    REQUIRED(service::create_and_start<LedSender>());
+    REQUIRED(svc::create_and_start<LedReceiver>());
+    REQUIRED(svc::create_and_start<LedSender>());
 
-    auto led_sender_state = service::get_state_for<LedSender>();
+    auto led_sender_state = svc::get_state_for<LedSender>();
     LOG_INFO("led sender init state: %u", led_sender_state);
 
     return true;

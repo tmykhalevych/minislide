@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <variant>
 
-namespace service
+namespace svc
 {
 
 // clang-format off
@@ -21,20 +21,26 @@ concept MessageReceiverImplConcept = requires(I mr)
 
 // clang-format on
 
+template <typename, typename>
+class MessageReceiver;
+
 template <typename T>
 concept MessageConcept = std::is_class_v<T>;
 
-template <typename TDerived, MessageConcept... TMessages>
-class MessageReceiver
+template <MessageConcept... TMessages>
+using MessageList = std::variant<TMessages...>;
+
+template <typename TDerived, typename... TMessages>
+class MessageReceiver<TDerived, MessageList<TMessages...>>
 {
 protected:
-    using Message = std::variant<TMessages...>;
+    using Message = MessageList<TMessages...>;
 
 private:
     template <typename S, typename M>
     friend void send_message_to(M&&);
 
-    void receive_message(auto&& message)
+    void receive_message(MessageConcept auto&& message)
     {
         event_loop().run_immediate([this, msg = std::move(message)] { impl().handle_message(std::move(msg)); });
     }
@@ -51,4 +57,4 @@ void send_message_to(TMessage&& msg)
     service->receive_message(std::move(msg));
 }
 
-}  // namespace service
+}  // namespace svc

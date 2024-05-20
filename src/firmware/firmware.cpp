@@ -11,9 +11,11 @@
 
 #include <led_receiver.hpp>
 #include <led_sender.hpp>
+#include <shell.hpp>
 
-#define REQUIRED(val) \
-    if (!(val)) return false
+// clang-format off
+#define REQUIRE(val) if (!(val)) return false
+// clang-format on
 
 namespace fw
 {
@@ -45,8 +47,9 @@ bool Firmware::init_services() const
 {
     LOG_INFO("init firmware");
 
-    REQUIRED(svc::create_and_start<LedReceiver>());
-    REQUIRED(svc::create_and_start<LedSender>());
+    REQUIRE(svc::create_and_start<Shell>());
+    REQUIRE(svc::create_and_start<LedReceiver>());
+    REQUIRE(svc::create_and_start<LedSender>());
 
     auto led_sender_state = svc::get_state_for<LedSender>();
     LOG_INFO("led sender init state: %u", led_sender_state);

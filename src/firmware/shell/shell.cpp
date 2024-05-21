@@ -1,22 +1,21 @@
+#include <getchar.hpp>
 #include <logger.hpp>
 #include <recursive_lambda.hpp>
+#include <scope_guard.hpp>
 #include <shell.hpp>
 #include <std_helpers.hpp>
 
-#include <functional>
 #include <ranges>
 #include <string_view>
 #include <tuple>
-#include <type_traits>
 
 namespace
 {
 
-using std::operator""sv;
-
 enum class CommandId : uint
 {
     UNKNOWN = 0,
+
     ECHO,
     SYS_INFO,
     SYS_STATUS
@@ -36,13 +35,6 @@ struct Command
 
 template <typename... TNext>
 Command(std::string_view, std::tuple<TNext...>) -> Command<TNext...>;
-
-constexpr std::string_view to_string_view(auto range)
-{
-    auto begin = std::ranges::begin(range);
-    auto end = std::ranges::end(range);
-    return std::string_view(&*begin, std::ranges::distance(begin, end));
-}
 
 static constexpr std::tuple SHELL_COMMANDS_TREE{
     Command{"echo"sv, CommandTarger{CommandId::ECHO}},
@@ -64,7 +56,7 @@ std::pair<CommandId, CommandArgsView> parse_command(std::string_view line)
                           return;
                       }
                       else {
-                          if (node.command == to_string_view(*word_iter)) {
+                          if (node.command == cmn::to_string_view(*word_iter)) {
                               ++word_iter;
                               cmn::for_each(node.next, self);
                           }
@@ -72,7 +64,7 @@ std::pair<CommandId, CommandArgsView> parse_command(std::string_view line)
                   }));
 
     if (command_id != CommandId::UNKNOWN) {
-        const auto first_param = to_string_view(*word_iter);
+        const auto first_param = cmn::to_string_view(*word_iter);
         command_args = std::string_view(first_param.begin(), std::distance(first_param.begin(), line.end()));
     }
 
@@ -89,8 +81,78 @@ auto parse_arguments(std::string_view line)
 namespace fw
 {
 
-void Shell::main()
+void Shell::read_char()
 {
+    cmn::ScopeGuard next_read([this] { run_after([this] { read_char(); }, 10); });
+
+    auto res = bsp::getchar(READ_TIMEOUT_US);
+    if (!res) {
+        return;
+    }
+
+    if (m_line.size() == (MAX_LINE_LENGTH - 1)) {
+        LOG_ERROR("line buffer overflow");
+        m_line.clear();
+        return;
+    }
+
+    const char ch = res.value();
+    if (ch == '\r' || ch == '\n') {
+        m_line.push_back('\0');
+        dispatch_command();
+        m_line.clear();
+        return;
+    }
+
+    m_line.push_back(ch);
+}
+
+void Shell::dispatch_command()
+{
+    auto [cmd, args_view] = parse_command({m_line.data(), m_line.size()});
+
+    switch (cmd) {
+        case CommandId::UNKNOWN: {
+            LOG_ERROR("unknown command");
+            break;
+        }
+        case CommandId::ECHO: {
+            on_echo(args_view);
+            break;
+        }
+        case CommandId::SYS_INFO: {
+            on_sys_info(args_view);
+            break;
+        }
+        case CommandId::SYS_STATUS: {
+            on_sys_state(args_view);
+            break;
+        }
+    }
+}
+
+void Shell::on_echo(std::string_view args_view)
+{
+    printf("%s\n", args_view.data());
+}
+
+void Shell::on_sys_info(std::string_view args_view)
+{
+    auto args = parse_arguments(args_view);
+    if (args.begin() != args.end()) {
+        LOG_WARN("excessive params");
+    }
+
+    // TODO: Implement
+}
+
+void Shell::on_sys_state(std::string_view args_view)
+{
+    auto args = parse_arguments(args_view);
+    if (args.begin() != args.end()) {
+        LOG_WARN("excessive params");
+    }
+
     // TODO: Implement
 }
 

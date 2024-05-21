@@ -290,10 +290,14 @@ TickType_t EventLoop<S, I, D>::process_deferred_tasks(Milliseconds start_timepoi
         current_deferred_task.task();
         lock.lock();
 
-        // handle periodic tasks
+        // re-schedule periodic task
         if (current_deferred_task.period) {
             current_deferred_task.deadline += current_deferred_task.period.value();
             m_deferred_tasks.push(std::move(current_deferred_task));
+        }
+        // remove handle for deferred task
+        else {
+            m_deferred_handles.erase(current_deferred_task.handle);
         }
     }
 

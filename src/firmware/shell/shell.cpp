@@ -3,77 +3,51 @@
 #include <recursive_lambda.hpp>
 #include <scope_guard.hpp>
 #include <shell.hpp>
-#include <std_helpers.hpp>
 
-#include <ranges>
+#include <optional>
 #include <string_view>
 #include <tuple>
 
 namespace
 {
 
-enum class CommandId : uint
+std::optional<fw::CommandId> match_command(const auto& node, const auto& tokens)
 {
-    UNKNOWN = 0,
+    fw::CommandId id;
+    auto next_token_iter = tokens.begin();
 
-    ECHO,
-    SYS_INFO,
-    SYS_STATUS
-};
-
-template <typename... T>
-using Subcommands = std::tuple<T...>;
-using CommandTarger = std::tuple<CommandId>;
-using CommandArgsView = std::string_view;
-
-template <typename... TNext>
-struct Command
-{
-    std::string_view command;
-    std::tuple<TNext...> next;
-};
-
-template <typename... TNext>
-Command(std::string_view, std::tuple<TNext...>) -> Command<TNext...>;
-
-static constexpr std::tuple SHELL_COMMANDS_TREE{
-    Command{"echo"sv, CommandTarger{CommandId::ECHO}},
-    Command{"sys"sv, Subcommands{Command{"info"sv, CommandTarger{CommandId::SYS_INFO}},
-                                 Command{"status"sv, CommandTarger{CommandId::SYS_STATUS}}}}};
-
-std::pair<CommandId, CommandArgsView> parse_command(std::string_view line)
-{
-    const auto words = std::views::split(line, " "sv);
-
-    auto word_iter = words.begin();
-    CommandId command_id = CommandId::UNKNOWN;
-    CommandArgsView command_args{};
-
-    cmn::for_each(SHELL_COMMANDS_TREE,
-                  cmn::RecursiveLambda([&word_iter, &command_id](const auto& self, const auto& node) {
-                      if constexpr (std::is_same_v<std::decay_t<decltype(node)>, CommandId>) {
-                          command_id = node;
-                          return;
-                      }
-                      else {
-                          if (node.command == cmn::to_string_view(*word_iter)) {
-                              ++word_iter;
-                              cmn::for_each(node.next, self);
-                          }
-                      }
-                  }));
-
-    if (command_id != CommandId::UNKNOWN) {
-        const auto first_param = cmn::to_string_view(*word_iter);
-        command_args = std::string_view(first_param.begin(), std::distance(first_param.begin(), line.end()));
+    if (next_token_iter == tokens.end()) {
+        return std::nullopt;
     }
 
-    return std::make_pair(command_id, command_args);
-}
+    cmn::RecursiveLambda check_node([&](const auto& self, const auto& node) {
+        using node_decay_t = std::decay_t<decltype(node)>;
 
-auto parse_arguments(std::string_view line)
-{
-    return std::views::split(line, " "sv) | std::views::filter([](auto word) { return !std::ranges::empty(word); });
+        if constexpr (cmn::is_tuple_v<node_decay_t>) {
+            return for_each_or(node, self);
+        }
+
+        if constexpr (cmn::is_pair_v<node_decay_t>) {
+            if (node.first == *next_token_iter) {
+                ++next_token_iter;
+                return for_each_or(node.second, self);
+            }
+            // keep iterating
+            return false;
+        }
+
+        if constexpr (std::is_same_v<node_decay_t, fw::CommandId>) {
+            id = node;
+            // stop iterating
+            return true;
+        }
+    });
+
+    if (!for_each_or(node, check_node)) {
+        return std::nullopt;
+    }
+
+    return std::make_optional(id);
 }
 
 }  // namespace
@@ -81,9 +55,9 @@ auto parse_arguments(std::string_view line)
 namespace fw
 {
 
-void Shell::read_char()
+void Shell::main()
 {
-    cmn::ScopeGuard next_read([this] { run_after([this] { read_char(); }, 10); });
+    cmn::ScopeGuard next_read([this] { run_after([this] { main(); }, 10); });
 
     auto res = bsp::getchar(READ_TIMEOUT_US);
     if (!res) {
@@ -109,51 +83,99 @@ void Shell::read_char()
 
 void Shell::dispatch_command()
 {
-    auto [cmd, args_view] = parse_command({m_line.data(), m_line.size()});
+    auto tokens = tokenize_line();
+    if (!tokens) {
+        LOG_ERROR("too many tokens");
+        return;
+    }
 
-    switch (cmd) {
-        case CommandId::UNKNOWN: {
-            LOG_ERROR("unknown command");
-            break;
-        }
+    auto command = match_command(SHELL_COMMANDS, tokens.value());
+    if (!command) {
+        LOG_ERROR("unknown command");
+        return;
+    }
+
+    switch (command.value()) {
         case CommandId::ECHO: {
-            on_echo(args_view);
+            on_echo();
             break;
         }
-        case CommandId::SYS_INFO: {
-            on_sys_info(args_view);
+        case CommandId::SYSTEM_INFO: {
+            on_sys_info();
             break;
         }
-        case CommandId::SYS_STATUS: {
-            on_sys_state(args_view);
+        case CommandId::SYSTEM_STATE: {
+            on_sys_state();
             break;
         }
     }
 }
 
-void Shell::on_echo(std::string_view args_view)
+void Shell::on_echo()
 {
-    printf("%s\n", args_view.data());
-}
-
-void Shell::on_sys_info(std::string_view args_view)
-{
-    auto args = parse_arguments(args_view);
-    if (args.begin() != args.end()) {
-        LOG_WARN("excessive params");
-    }
-
     // TODO: Implement
 }
 
-void Shell::on_sys_state(std::string_view args_view)
+void Shell::on_sys_info()
 {
-    auto args = parse_arguments(args_view);
-    if (args.begin() != args.end()) {
-        LOG_WARN("excessive params");
+    // TODO: Implement
+}
+
+void Shell::on_sys_state()
+{
+    // TODO: Implement
+}
+
+std::optional<Shell::tokens> Shell::tokenize_line() const
+{
+    std::string_view input(m_line.data(), m_line.size() - 1);
+    tokens tokens;
+    bool in_quotes = false;
+    size_t token_start_pos = 0;
+
+    auto add_token = [&](size_t start, size_t end) {
+        if (tokens.full() || end <= start) {
+            return false;
+        }
+
+        tokens.emplace_back(input.substr(start, end - start));
+        return true;
+    };
+
+    for (size_t pos = 0; pos < input.size(); ++pos) {
+        char ch = input[pos];
+        if (ch == '"') {
+            if (in_quotes) {
+                // end of quoted token
+                if (!add_token(token_start_pos, pos)) {
+                    return std::nullopt;
+                }
+                in_quotes = false;
+                token_start_pos = pos + 1;
+            }
+            else {
+                // start of quoted token
+                in_quotes = true;
+                token_start_pos = pos + 1;
+            }
+        }
+        else if (!in_quotes && std::isspace(ch)) {
+            if (!add_token(token_start_pos, pos)) {
+                return std::nullopt;
+            }
+            // skip over consecutive spaces
+            while (pos < input.size() && std::isspace(input[pos])) {
+                ++pos;
+            }
+            token_start_pos = pos;
+            --pos;
+        }
     }
 
-    // TODO: Implement
+    // add the last token if any
+    add_token(token_start_pos, input.size());
+
+    return std::make_optional(std::move(tokens));
 }
 
 }  // namespace fw

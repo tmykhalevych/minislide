@@ -4,8 +4,9 @@
 #include <ranges>
 #include <string_view>
 #include <tuple>
+#include <utility>
 
-using std::operator""sv;
+using namespace std::literals;
 
 namespace cmn
 {
@@ -24,19 +25,38 @@ struct Alternatives : A...
 template <typename... A>
 Alternatives(A...) -> Alternatives<A...>;
 
-template <size_t I = 0, typename F, typename... TArgs>
-constexpr void for_each(const std::tuple<TArgs...>& t, const F& f)
+/// @brief Helper function to apply lambda to each tuple element and OR the results
+constexpr inline bool for_each_or(const auto& tuple, auto&& func)
 {
-    f(std::get<I>(t));
-    if constexpr (I + 1 != sizeof...(TArgs)) for_each<I + 1>(t, f);
+    return std::apply([&func](const auto&... args) { return (func(args) || ...); }, tuple);
 }
 
-template <std::ranges::range TRange>
-constexpr std::string_view to_string_view(TRange range)
+template <typename T>
+struct is_tuple : std::false_type
 {
-    auto begin = std::ranges::begin(range);
-    auto end = std::ranges::end(range);
-    return std::string_view(&*begin, std::ranges::distance(begin, end));
-}
+};
+
+template <typename... Ts>
+struct is_tuple<std::tuple<Ts...>> : std::true_type
+{
+};
+
+/// @brief Trait to determine whether T is an std::tuple
+template <typename T>
+static constexpr auto is_tuple_v = is_tuple<T>::value;
+
+template <typename T>
+struct is_pair : std::false_type
+{
+};
+
+template <typename F, typename S>
+struct is_pair<std::pair<F, S>> : std::true_type
+{
+};
+
+/// @brief Trait to determine whether T is an std::pair
+template <typename T>
+static constexpr auto is_pair_v = is_pair<T>::value;
 
 }  // namespace cmn
